@@ -1,9 +1,9 @@
-package ch.samira.tesan.focusdesk.task;
+package ch.samira.tesan.kitcord.task;
 
-import ch.samira.tesan.focusdesk.task.enums.TaskPriority;
-import ch.samira.tesan.focusdesk.task.enums.TaskStatus;
-import ch.samira.tesan.focusdesk.user.User;
-import ch.samira.tesan.focusdesk.category.Category;
+import ch.samira.tesan.kitcord.task.enums.TaskPriority;
+import ch.samira.tesan.kitcord.task.enums.TaskStatus;
+import ch.samira.tesan.kitcord.user.User;
+import ch.samira.tesan.kitcord.category.Category;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;

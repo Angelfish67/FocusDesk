@@ -1,6 +1,6 @@
-package ch.samira.tesan.focusdesk.category;
+package ch.samira.tesan.kitcord.category;
 
-import ch.samira.tesan.focusdesk.task.Task;
+import ch.samira.tesan.kitcord.task.Task;
 import jakarta.persistence.*;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package ch.samira.tesan.focusdesk.user;
+package ch.samira.tesan.kitcord.user;
 
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package ch.samira.tesan.focusdesk.task.enums;
+package ch.samira.tesan.kitcord.task.enums;
 
 public enum TaskStatus {
    OPEN,

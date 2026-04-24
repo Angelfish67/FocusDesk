@@ -1,4 +1,4 @@
-package ch.samira.tesan.focusdesk;
+package ch.samira.tesan.kitcord;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

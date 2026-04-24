@@ -1,4 +1,4 @@
-package ch.samira.tesan.focusdesk;
+package ch.samira.tesan.kitcord;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

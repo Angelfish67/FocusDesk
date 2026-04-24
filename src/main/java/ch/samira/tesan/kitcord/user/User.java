@@ -1,5 +1,5 @@
-package ch.samira.tesan.focusdesk.user;
-import ch.samira.tesan.focusdesk.user.enums.Role;
+package ch.samira.tesan.kitcord.user;
+import ch.samira.tesan.kitcord.user.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 
