@@ -6,7 +6,7 @@ spring:
     hibernate:
       ddl-auto: update
   datasource:
-    url: jdbc:postgresql://localhost:5432/m-295-demo
+    url: jdbc:postgresql://localhost:5432/kitcord
     username: postgres
     password: 123456
     driverClassName: org.postgresql.Driver
