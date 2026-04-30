@@ -5,7 +5,9 @@ import ch.samira.tesan.kitcord.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ChatService {
@@ -27,9 +29,29 @@ public class ChatService {
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
     }
 
-    public Chat createChat(Chat chat) {
+    public Chat createChat(CreateChatRequest request) {
+        if (request.getUserIds() == null || request.getUserIds().isEmpty()) {
+            throw new RuntimeException("At least one user is required");
+        }
+
+        if (request.getChatType() == ChatType.DIRECT && request.getUserIds().size() != 2) {
+            throw new RuntimeException("Direct chat must have exactly 2 users");
+        }
+
+        Chat chat = new Chat();
         chat.setId(null);
+        chat.setName(request.getName());
+        chat.setChatType(request.getChatType());
         chat.setCreatedAt(LocalDateTime.now());
+
+        Set<User> users = new HashSet<>(userRepository.findAllById(request.getUserIds()));
+
+        if (users.size() != request.getUserIds().size()) {
+            throw new RuntimeException("One or more users not found");
+        }
+
+        chat.setUsers(users);
+
         return chatRepository.save(chat);
     }
 

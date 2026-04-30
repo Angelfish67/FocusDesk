@@ -25,8 +25,8 @@ public class ChatController {
     }
 
     @PostMapping
-    public Chat createChat(@RequestBody Chat chat) {
-        return chatService.createChat(chat);
+    public Chat createChat(@RequestBody CreateChatRequest request) {
+        return chatService.createChat(request);
     }
 
     @PutMapping("/{id}")
