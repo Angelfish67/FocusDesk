@@ -17,11 +17,12 @@ public class UserService {
     }
 
     public User getCurrentUser() {
-
         return userRepository.findAll().stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No users found"));
     }
+
+    public User createUser(User user) {
+        return userRepository.save(user);
+    }
 }
-
-
