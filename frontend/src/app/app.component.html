@@ -1,59 +1,46 @@
-<div style="height: 100%; overflow: hidden">
-  <div style="vertical-align: middle">
-    <button (click)="drawer.toggle()" color="primary" mat-icon-button type="button">
-      <mat-icon>menu</mat-icon>
-    </button>
-    <app-header></app-header>
-  </div>
+<div class="kitcord-shell">
 
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/images/logo.png" alt="Kitcord Logo" class="brand-logo">
+      <h1>Kitcord</h1>
+    </div>
 
-  <mat-drawer-container class="demoapp-container">
-    <mat-drawer #drawer [opened]="true" class="demoapp-sidenav" mode="side">
-      <div>
-        <div>
-          <button [routerLink]="['dashboard']" color="primary" mat-button>
-            <mat-icon>dashboard</mat-icon>&nbsp;{{'nav.dashboard' | translate }}</button>
-          </div>
-          <div>
-            <button [routerLink]="['departments']" color="primary" mat-button>
-              <mat-icon>business</mat-icon>&nbsp;{{'nav.departments' | translate }}</button>
-            </div>
-            <div>
-              <button [routerLink]="['employees']" color="primary" mat-button>
-                <mat-icon>badge</mat-icon>&nbsp;{{'nav.employees' | translate }}</button>
-              </div>
-              <div>
-                <button [routerLink]="['vehicles']" color="primary" mat-button>
-                  <mat-icon>garage_outline</mat-icon>&nbsp;{{'nav.vehicles' | translate }}</button>
-                </div>
-                <div>
-                  <button [routerLink]="['vehicle-usages']" color="primary" mat-button>
-                    <mat-icon>shopping_basket</mat-icon>&nbsp;{{'nav.usage' | translate }}</button>
-                  </div>
-                  @if (useralias() !== '') {
-                    <div style="margin-top: 50px">
-                      <button (click)="logout()" color="warn" mat-button>
-                        <mat-icon>logout</mat-icon>
-                        {{ 'nav.logout' | translate }}
-                      </button>
-                    </div>
-                  }
-                </div>
-                <div style="margin-top: 50px;margin-left: 20px;">
-                  <mat-form-field style="width: 80%">
-                    <mat-label>{{ 'main.lang' | translate }}</mat-label>
-                    <mat-select #langSelect (valueChange)="setLanguage(langSelect.value)" [value]="translate.currentLang">
-                      <mat-option value="de_CH">Deutsch</mat-option>
-                      <mat-option value="en">English</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                </div>
-              </mat-drawer>
+    <div class="topbar-actions">
+      <button [routerLink]="['/login']" mat-button>
+        Login
+      </button>
 
-              <div class="demoapp-sidenav-content">
-                <router-outlet></router-outlet>
-              </div>
+      <button [routerLink]="['/register']" color="primary" mat-flat-button>
+        Registrieren
+      </button>
+    </div>
+  </header>
 
-            </mat-drawer-container>
-          </div>
+  <main class="landing-page">
 
+    <section class="hero-card">
+
+      <img src="assets/images/logo.png" alt="Kitcord Logo" class="hero-logo">
+
+      <h2>Willkommen bei Kitcord</h2>
+
+      <p>
+        Deine moderne Chat-App für Freunde, Gruppen und Communitys.
+      </p>
+
+      <div class="hero-buttons">
+        <button [routerLink]="['/login']" color="primary" mat-flat-button>
+          Login
+        </button>
+
+        <button [routerLink]="['/register']" mat-stroked-button>
+          Registrieren
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
