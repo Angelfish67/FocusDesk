@@ -5,27 +5,43 @@
     <h1>Willkommen zurück</h1>
     <p>Melde dich an und öffne deine Chats.</p>
 
-    <form class="auth-form">
+    <form class="auth-form" (ngSubmit)="login()">
       <mat-form-field appearance="outline">
-        <mat-label>E-Mail</mat-label>
-        <input matInput type="email" placeholder="name@example.com">
-        <mat-icon matSuffix>mail</mat-icon>
+        <mat-label>Benutzername</mat-label>
+        <input
+          matInput
+          name="username"
+          type="text"
+          [(ngModel)]="username"
+          placeholder="Benutzername"
+        >
+        <mat-icon matSuffix>person</mat-icon>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Passwort</mat-label>
-        <input matInput type="password" placeholder="Dein Passwort">
+        <input
+          matInput
+          name="password"
+          type="password"
+          [(ngModel)]="password"
+          placeholder="Passwort"
+        >
         <mat-icon matSuffix>lock</mat-icon>
       </mat-form-field>
 
-      <button class="auth-submit" color="primary" mat-flat-button type="submit">
-        Login
+      @if (errorMessage) {
+        <p class="auth-error">{{ errorMessage }}</p>
+      }
+
+      <button class="auth-submit" color="primary" mat-flat-button type="submit" [disabled]="loading">
+        {{ loading ? 'Wird angemeldet...' : 'Login' }}
       </button>
     </form>
 
     <p class="auth-switch">
       Noch kein Konto?
-      <a [routerLink]="['/register']">Jetzt registrieren</a>
+      <a routerLink="/register">Jetzt registrieren</a>
     </p>
   </section>
 </div>

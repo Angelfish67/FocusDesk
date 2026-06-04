@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  backendBaseUrl: 'http://localhost:9090/api/',
-  frontendBaseUrl: 'http://localhost:4200'
+  frontendBaseUrl: 'http://localhost:4200',
+  backendBaseUrl: 'http://localhost:9090'
 };
 
 /*

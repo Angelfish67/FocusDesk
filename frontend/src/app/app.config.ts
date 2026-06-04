@@ -9,9 +9,10 @@ import {
   ApplicationConfig,
   enableProdMode,
   importProvidersFrom,
+  inject,
   provideBrowserGlobalErrorListeners,
   provideEnvironmentInitializer,
-  inject
+  provideZoneChangeDetection
 } from '@angular/core';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { BrowserModule } from '@angular/platform-browser';
@@ -42,15 +43,21 @@ if (environment.production) {
 export const authConfig: AuthConfig = {
   issuer: 'http://localhost:8080/realms/kitcord',
   requireHttps: false,
+
   redirectUri: environment.frontendBaseUrl,
   postLogoutRedirectUri: environment.frontendBaseUrl,
-  clientId: 'demoapp',
+
+  clientId: 'kitcord',
+
   scope: 'openid profile roles offline_access',
   responseType: 'code',
+
   showDebugInformation: true,
   requestAccessToken: true,
+
   silentRefreshRedirectUri: window.location.origin + '/silent-refresh.html',
   silentRefreshTimeout: 500,
+
   clearHashAfterLogin: true,
   waitForTokenInMsec: 1000
 };
@@ -61,7 +68,7 @@ export function storageFactory(): OAuthStorage {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideBrowserGlobalErrorListeners(),
 
     importProvidersFrom(
@@ -117,7 +124,10 @@ export const appConfig: ApplicationConfig = {
     provideOAuthClient({
       resourceServer: {
         sendAccessToken: true,
-        allowedUrls: [environment.backendBaseUrl]
+        allowedUrls: [
+          'http://localhost:9090',
+          environment.backendBaseUrl
+        ]
       }
     }),
 
