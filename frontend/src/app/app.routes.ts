@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { DashboardComponent } from './pages/homepage/homepage.component';
+import { HomepageComponent } from './pages/homepage/homepage.component';
 import { LoginComponent } from './pages/account/login/login.component';
 import { RegisterComponent } from './pages/account/register/register.component';
 import { NoAccessComponent } from './pages/no-access/no-access.component';
@@ -8,7 +8,11 @@ import { NoAccessComponent } from './pages/no-access/no-access.component';
 export const routes: Routes = [
   {
     path: '',
-    component: DashboardComponent
+    component: HomepageComponent
+  },
+  {
+    path: 'homepage',
+    component: HomepageComponent
   },
   {
     path: 'login',

@@ -1,34 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
-import {AppAuthService} from '../../service/app.auth.service';
-import {HeaderService} from '../../service/header.service';
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-import { AppLoginComponent } from '../../components/app-login/app-login.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
-    selector: 'app-dashboard',
-    templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.scss'],
-    imports: [AppLoginComponent, TranslateModule]
+  selector: 'app-homepage',
+  standalone: true,
+  imports: [
+    RouterLink,
+    MatButtonModule
+  ],
+  templateUrl: './homepage.component.html',
+  styleUrls: ['./homepage.component.scss']
 })
-export class DashboardComponent implements OnInit {
-  private authService = inject(AppAuthService);
-  private headerService = inject(HeaderService);
-
-  useralias = '';
-  username = '';
-
-  constructor() {
-    this.headerService.setPage('nav.dashboard');
-  }
-
-  ngOnInit(): void {
-    this.authService.usernameObservable.subscribe(name => {
-      this.username = name;
-    });
-    this.authService.useraliasObservable.subscribe(alias => {
-      this.useralias = alias;
-    });
-  }
-
-}
+export class HomepageComponent {}

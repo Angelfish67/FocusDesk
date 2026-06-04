@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DashboardComponent } from './homepage.component';
+import { HomepageComponent } from './homepage.component';
 import { AuthConfig, OAuthModule } from 'angular-oauth2-oidc';
 import { expect } from 'vitest';
 import { authConfig } from '../../app.config';
 import { provideTranslateService } from '@ngx-translate/core';
 
 describe('DashboardComponent', () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
+  let component: HomepageComponent;
+  let fixture: ComponentFixture<HomepageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         OAuthModule.forRoot({ resourceServer: { sendAccessToken: true } }),
-        DashboardComponent,
+        HomepageComponent,
       ],
       providers: [
         { provide: AuthConfig, useValue: authConfig },
@@ -28,7 +28,7 @@ describe('DashboardComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DashboardComponent);
+    fixture = TestBed.createComponent(HomepageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
