@@ -7,15 +7,15 @@
 
     <form class="auth-form" (ngSubmit)="login()">
       <mat-form-field appearance="outline">
-        <mat-label>Benutzername</mat-label>
+        <mat-label>E-Mail</mat-label>
         <input
           matInput
-          name="username"
-          type="text"
-          [(ngModel)]="username"
-          placeholder="Benutzername"
+          name="email"
+          type="email"
+          [(ngModel)]="email"
+          placeholder="name@example.com"
         >
-        <mat-icon matSuffix>person</mat-icon>
+        <mat-icon matSuffix>mail</mat-icon>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -34,7 +34,13 @@
         <p class="auth-error">{{ errorMessage }}</p>
       }
 
-      <button class="auth-submit" color="primary" mat-flat-button type="submit" [disabled]="loading">
+      <button
+        class="auth-submit"
+        color="primary"
+        mat-flat-button
+        type="submit"
+        [disabled]="loading"
+      >
         {{ loading ? 'Wird angemeldet...' : 'Login' }}
       </button>
     </form>

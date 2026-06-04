@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { switchMap } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthApiService } from '../../../service/auth-api.service';
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-login',
   standalone: true,
   imports: [
     FormsModule,
@@ -21,68 +20,44 @@ import { AuthApiService } from '../../../service/auth-api.service';
     MatInputModule,
     MatIconModule
   ],
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
-export class RegisterComponent {
+export class LoginComponent {
   private authApiService = inject(AuthApiService);
   private router = inject(Router);
 
-  username = '';
   email = '';
-  firstName = '';
-  lastName = '';
   password = '';
-  confirmPassword = '';
 
   loading = false;
   errorMessage = '';
 
-  register(): void {
+  login(): void {
     this.errorMessage = '';
 
-    if (
-      !this.username.trim() ||
-      !this.email.trim() ||
-      !this.firstName.trim() ||
-      !this.lastName.trim() ||
-      !this.password ||
-      !this.confirmPassword
-    ) {
-      this.errorMessage = 'Bitte alle Felder ausfüllen.';
-      return;
-    }
-
-    if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'Die Passwörter stimmen nicht überein.';
+    if (!this.email.trim() || !this.password) {
+      this.errorMessage = 'Bitte E-Mail und Passwort eingeben.';
       return;
     }
 
     this.loading = true;
 
-    const email = this.email.trim();
-    const password = this.password;
-
-    this.authApiService.register({
-      username: this.username.trim(),
-      email,
-      firstName: this.firstName.trim(),
-      lastName: this.lastName.trim(),
-      password
-    }).pipe(
-      switchMap(() => this.authApiService.login({ email, password }))
-    ).subscribe({
+    this.authApiService.login({
+      email: this.email.trim(),
+      password: this.password
+    }).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(['/chat']);
       },
       error: error => {
         this.loading = false;
-        console.error('Register/Login error:', error);
+        console.error('Login error:', error);
 
         this.errorMessage = typeof error.error === 'string'
           ? error.error
-          : 'Registrierung fehlgeschlagen.';
+          : 'Login fehlgeschlagen. Prüfe deine Zugangsdaten.';
       }
     });
   }
