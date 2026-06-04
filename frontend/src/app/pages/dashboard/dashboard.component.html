@@ -1,0 +1,11 @@
+@if (useralias !== '') {
+  <div style="font-weight: bold">
+    {{ 'dashboard.welcome' | translate:{username: username, useralias: useralias} }}
+  <!--div [innerHTML]="'dashboard.welcome' | translate: {username: username, useralias: useralias}"></div-->
+</div>
+}
+@if (!useralias || useralias === '') {
+  <div>
+    <app-login></app-login>
+  </div>
+}
