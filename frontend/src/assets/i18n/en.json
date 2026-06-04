@@ -1,0 +1,80 @@
+{
+  "main": {
+    "lang": "Language",
+    "button_save": "Save",
+    "button_back": "Back",
+    "button_yes": "Yes",
+    "button_no": "No",
+    "login": "Please login to use the application!"
+  },
+  "dialogs": {
+    "message_delete": "Do you really want to delete this entry?",
+    "title_delete": "Are you sure?"
+  },
+  "messages": {
+    "save_ok": "Item saved!",
+    "deleted_ok": "Item deleted!",
+    "delete_error": "Item could not be deleted, server error!",
+    "save_error": "Item could not be saved, server error!",
+    "save_new_ok": "New item saved!",
+    "save_new_error": "New item could not be saved, server error!",
+    "close": "Close"
+  },
+  "vehicle": {
+    "title": "Vehicles",
+    "button_new": "Add new vehicle",
+    "type": "Type",
+    "licence": "Licence",
+    "description": "Description",
+    "typeCar": "Car",
+    "typeBicycle": "Bicycle"
+  },
+  "department": {
+    "name": "Name",
+    "button_new": "Add new department"
+  },
+  "employee": {
+    "name": "Name",
+    "firstname": "Firstname",
+    "badge": "Badge",
+    "department": "Department",
+    "button_new": "Add new employee"
+  },
+  "vehicleUsage": {
+    "fromDate": "Date from",
+    "toDate": "Date to",
+    "fromLocation": "From",
+    "toLocation": "To",
+    "text": "Text",
+    "km": "KM",
+    "vehicle": "Vehicle",
+    "employee": "Employee",
+    "button_new": "Add new vehicle usage data"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "departments": "Departments",
+    "employees": "Employees",
+    "employee_edit": "Edit employee",
+    "employee_new": "Add new employee",
+    "vehicles": "Vehicles",
+    "vehicle_edit": "Edit vehicle",
+    "vehicle_new": "Add new vehicle",
+    "vehicleUsage_edit": "Edit vehicle usage",
+    "vehicleUsage_new": "Add new vehicle usage",
+    "usage": "Vehicle Usage",
+    "noaccess": "No Access",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "welcome": "Welcome {{username}} ({{useralias}})!"
+  },
+  "mat": {
+    "Items per page:": "Items per page:",
+    "Next page": "Next page",
+    "Previous page": "Previous page",
+    "First page": "First page",
+    "Last page": "Last page"
+  }
+}

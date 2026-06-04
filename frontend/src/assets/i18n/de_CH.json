@@ -1,0 +1,80 @@
+{
+  "main": {
+    "lang": "Sprache",
+    "button_save": "Speichern",
+    "button_back": "Zurück",
+    "button_yes": "Ja",
+    "button_no": "Nein",
+    "login": "Bitte melden Sie sich an um die Applikation zu verwenden!"
+  },
+  "dialogs": {
+    "message_delete": "Soll dieser Eintrag wirklich gelöscht werden?",
+    "title_delete": "Sind Sie sicher?"
+  },
+  "messages": {
+    "save_ok": "Objekt gespeichert!",
+    "deleted_ok": "Objekt gelöscht!",
+    "delete_error": "Objekt konnte nicht gelöscht werden!",
+    "save_error": "Objekt konnte nicht gespeichert werden. Server Fehler!",
+    "save_new_ok": "Neues Objekt gespeichert!",
+    "save_new_error": "Neues Objekt konnte nicht gespeichert werden. Server Fehler!",
+    "close": "Schliessen"
+  },
+  "vehicle": {
+    "title": "Fahrzeuge",
+    "button_new": "Neues Fahrzeug hinzufügen",
+    "type": "Art",
+    "licence": "Zulassung",
+    "description": "Beschreibung",
+    "typeCar": "Motorfahrzeug",
+    "typeBicycle": "Fahrrad"
+  },
+  "department": {
+    "name": "Name",
+    "button_new": "Neue Abteilung erfassen"
+  },
+  "employee": {
+    "name": "Nachname",
+    "firstname": "Vorname",
+    "badge": "Mitarbeiternummer",
+    "department": "Abteilung",
+    "button_new": "Neuer Mitarbeiter erfassen"
+  },
+  "vehicleUsage": {
+    "fromDate": "Datum von",
+    "toDate": "Datum bis",
+    "fromLocation": "Von",
+    "toLocation": "Nach",
+    "text": "Text",
+    "km": "KM",
+    "vehicle": "Fahrzeug",
+    "employee": "Mitarbeiter",
+    "button_new": "Neue Fahrzeugbenutzung erfassen"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "departments": "Abteilungen",
+    "employees": "Mitarbeiter",
+    "employee_edit": "Mitarbeiter editieren",
+    "employee_new": "Neuer Mitarbeiter erfassen",
+    "vehicles": "Fahrzeuge",
+    "vehicle_edit": "Fahrzeug editieren",
+    "vehicle_new": "Neues Fahrzeug erfassen",
+    "vehicleUsage_edit": "Fahrzeugbenutzung editieren",
+    "vehicleUsage_new": "Neue Fahrzeugbenutzung erfassen",
+    "usage": "Fahrzeugbenutzung",
+    "noaccess": "Kein Zugriff",
+    "login": "Anmelden",
+    "logout": "Abmelden"
+  },
+  "dashboard": {
+    "welcome": "Willkommen {{username}} ({{useralias}})!"
+  },
+  "mat": {
+    "Items per page:": "Anzahl Einträge pro Seite:",
+    "Next page": "Nächste Seite",
+    "Previous page": "Vorherige Seite",
+    "First page": "Erste Seite",
+    "Last page": "Letzte Seite"
+  }
+}

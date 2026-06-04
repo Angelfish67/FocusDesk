@@ -1,0 +1,59 @@
+<div style="height: 100%; overflow: hidden">
+  <div style="vertical-align: middle">
+    <button (click)="drawer.toggle()" color="primary" mat-icon-button type="button">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <app-header></app-header>
+  </div>
+
+
+  <mat-drawer-container class="demoapp-container">
+    <mat-drawer #drawer [opened]="true" class="demoapp-sidenav" mode="side">
+      <div>
+        <div>
+          <button [routerLink]="['dashboard']" color="primary" mat-button>
+            <mat-icon>dashboard</mat-icon>&nbsp;{{'nav.dashboard' | translate }}</button>
+          </div>
+          <div>
+            <button [routerLink]="['departments']" color="primary" mat-button>
+              <mat-icon>business</mat-icon>&nbsp;{{'nav.departments' | translate }}</button>
+            </div>
+            <div>
+              <button [routerLink]="['employees']" color="primary" mat-button>
+                <mat-icon>badge</mat-icon>&nbsp;{{'nav.employees' | translate }}</button>
+              </div>
+              <div>
+                <button [routerLink]="['vehicles']" color="primary" mat-button>
+                  <mat-icon>garage_outline</mat-icon>&nbsp;{{'nav.vehicles' | translate }}</button>
+                </div>
+                <div>
+                  <button [routerLink]="['vehicle-usages']" color="primary" mat-button>
+                    <mat-icon>shopping_basket</mat-icon>&nbsp;{{'nav.usage' | translate }}</button>
+                  </div>
+                  @if (useralias() !== '') {
+                    <div style="margin-top: 50px">
+                      <button (click)="logout()" color="warn" mat-button>
+                        <mat-icon>logout</mat-icon>
+                        {{ 'nav.logout' | translate }}
+                      </button>
+                    </div>
+                  }
+                </div>
+                <div style="margin-top: 50px;margin-left: 20px;">
+                  <mat-form-field style="width: 80%">
+                    <mat-label>{{ 'main.lang' | translate }}</mat-label>
+                    <mat-select #langSelect (valueChange)="setLanguage(langSelect.value)" [value]="translate.currentLang">
+                      <mat-option value="de_CH">Deutsch</mat-option>
+                      <mat-option value="en">English</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </mat-drawer>
+
+              <div class="demoapp-sidenav-content">
+                <router-outlet></router-outlet>
+              </div>
+
+            </mat-drawer-container>
+          </div>
+
