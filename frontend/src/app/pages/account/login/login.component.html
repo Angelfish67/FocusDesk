@@ -1,0 +1,31 @@
+<div class="auth-page">
+  <section class="auth-card">
+    <img src="assets/images/logo.png" alt="Kitcord Logo" class="auth-logo">
+
+    <h1>Willkommen zurück</h1>
+    <p>Melde dich an und öffne deine Chats.</p>
+
+    <form class="auth-form">
+      <mat-form-field appearance="outline">
+        <mat-label>E-Mail</mat-label>
+        <input matInput type="email" placeholder="name@example.com">
+        <mat-icon matSuffix>mail</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Passwort</mat-label>
+        <input matInput type="password" placeholder="Dein Passwort">
+        <mat-icon matSuffix>lock</mat-icon>
+      </mat-form-field>
+
+      <button class="auth-submit" color="primary" mat-flat-button type="submit">
+        Login
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Noch kein Konto?
+      <a [routerLink]="['/register']">Jetzt registrieren</a>
+    </p>
+  </section>
+</div>

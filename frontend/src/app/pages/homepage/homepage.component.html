@@ -1,0 +1,82 @@
+<div class="kitcord-shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <img
+        src="assets/images/logo.png"
+        alt="Kitcord Logo"
+        class="brand-logo"
+      >
+
+      <h1>Kitcord</h1>
+    </div>
+
+    <div class="topbar-actions">
+      <button
+        [routerLink]="['/login']"
+        mat-button>
+        Login
+      </button>
+
+      <button
+        [routerLink]="['/register']"
+        color="primary"
+        mat-flat-button>
+        Registrieren
+      </button>
+    </div>
+  </header>
+
+  <main class="landing-page">
+
+    <section class="hero">
+
+      <div class="hero-left">
+
+        <span class="hero-badge">
+          Moderne Chat-Plattform
+        </span>
+
+        <h2>
+          Verbinde dich mit Freunden, Teams und Communitys.
+        </h2>
+
+        <p>
+          Kitcord ist eine moderne Chat-Anwendung für private Nachrichten,
+          Gruppen, Communitys und Zusammenarbeit.
+        </p>
+
+        <div class="hero-buttons">
+
+          <button
+            [routerLink]="['/register']"
+            color="primary"
+            mat-flat-button>
+            Kostenlos starten
+          </button>
+
+          <button
+            [routerLink]="['/login']"
+            mat-stroked-button>
+            Anmelden
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="hero-right">
+
+        <img
+          src="assets/images/logo.png"
+          alt="Kitcord Logo"
+          class="hero-logo"
+        >
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
