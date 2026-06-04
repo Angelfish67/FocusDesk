@@ -1,5 +1,0 @@
-$kind: http-request
-name: admin_get_chats
-url: http://localhost:9090/admin/chats
-method: GET
-order: 195410336958153
