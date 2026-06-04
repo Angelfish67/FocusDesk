@@ -1,0 +1,5 @@
+$kind: http-request
+name: get_message_by_id
+url: http://localhost:9090/messages/1
+method: GET
+order: 3004027575244624

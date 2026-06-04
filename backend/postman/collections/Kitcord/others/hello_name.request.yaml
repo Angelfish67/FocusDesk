@@ -1,0 +1,7 @@
+$kind: http-request
+name: hello_name
+url: http://localhost:9090/helloname?name=Samira
+method: GET
+queryParams:
+  name: Samira
+order: 3505884276276125

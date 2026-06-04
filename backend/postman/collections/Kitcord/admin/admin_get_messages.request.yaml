@@ -1,0 +1,5 @@
+$kind: http-request
+name: admin_get_messages
+url: http://localhost:9090/admin/messages
+method: GET
+order: 3707234719619161

@@ -1,0 +1,5 @@
+$kind: http-request
+name: admin_get_users
+url: http://localhost:9090/admin/users
+method: GET
+order: 4165724206155718

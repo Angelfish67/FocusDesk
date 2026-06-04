@@ -1,0 +1,5 @@
+$kind: http-request
+name: hello_world
+url: http://localhost:9090/helloworld
+method: GET
+order: 1778138357588

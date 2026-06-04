@@ -1,0 +1,5 @@
+$kind: http-request
+name: add_user
+url: http://localhost:9090/chats/1/users/2
+method: POST
+order: 1778138204066

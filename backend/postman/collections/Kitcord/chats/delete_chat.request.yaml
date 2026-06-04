@@ -1,0 +1,5 @@
+$kind: http-request
+name: delete_chat
+url: http://localhost:9090/chats/1
+method: DELETE
+order: 3272547538125497

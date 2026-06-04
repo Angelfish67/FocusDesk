@@ -1,0 +1,16 @@
+$kind: http-request
+name: create_direct_chat
+url: http://localhost:9090/chats
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"Direct Chat\",\r
+
+    \  \"chatType\": \"DIRECT\",\r
+
+    \  \"userIds\": [1, 2]\r
+
+    }"
+order: 4437770043887912

@@ -1,0 +1,5 @@
+$kind: http-request
+name: admin_dashboard
+url: http://localhost:9090/admin/dashboard
+method: GET
+order: 4212739013244639

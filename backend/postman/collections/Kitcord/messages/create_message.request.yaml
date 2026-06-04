@@ -1,0 +1,16 @@
+$kind: http-request
+name: create_message
+url: http://localhost:9090/messages
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"content\": \"Hello, this is a message.\",\r
+
+    \  \"chatId\": 1,\r
+
+    \  \"senderId\": 1\r
+
+    }"
+order: 1237533928462339

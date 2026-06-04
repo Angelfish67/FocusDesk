@@ -1,0 +1,5 @@
+$kind: http-request
+name: delete_message
+url: http://localhost:9090/messages/1
+method: DELETE
+order: 1778138184504

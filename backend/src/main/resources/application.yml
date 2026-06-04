@@ -1,0 +1,19 @@
+server:
+  port: 9090
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/kitcord
+
+app:
+  name: kitcord
+
+keycloak:
+  server-url: http://localhost:8080
+  realm: kitcord
+  client-id: kitcord
+  admin-client-id: kitcord_backend
+  admin-client-secret: chsuCzGIr50BGxqsBDVyRmUzXATsvaST

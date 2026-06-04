@@ -1,0 +1,16 @@
+$kind: http-request
+name: create_group_chat
+url: http://localhost:9090/chats
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"School Group Chat\",\r
+
+    \  \"chatType\": \"GROUP\",\r
+
+    \  \"userIds\": [1, 2]\r
+
+    }"
+order: 4452698007637136

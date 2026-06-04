@@ -1,0 +1,5 @@
+$kind: http-request
+name: get_all_messages
+url: http://localhost:9090/messages
+method: GET
+order: 3603091815778222

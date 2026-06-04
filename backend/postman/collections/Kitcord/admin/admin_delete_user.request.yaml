@@ -1,0 +1,5 @@
+$kind: http-request
+name: admin_delete_user
+url: http://localhost:9090/admin/users/1
+method: DELETE
+order: 1778138158562

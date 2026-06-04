@@ -1,0 +1,5 @@
+$kind: http-request
+name: admin_health
+url: http://localhost:9090/admin/health
+method: GET
+order: 4471969729539990

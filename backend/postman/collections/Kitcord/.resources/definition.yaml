@@ -1,0 +1,59 @@
+$kind: collection
+name: Kitcord
+variables:
+  access_token: ""
+scripts:
+  - type: http:beforeRequest
+    code: "if (!pm.collectionVariables.get(\"access_token\")) {\r
+
+      \    pm.sendRequest({\r
+
+      \        url: \"http://localhost:8080/realms/kitcord/protocol/openid-connect/token\",\r
+
+      \        method: \"POST\",\r
+
+      \        header: {\r
+
+      \            \"Content-Type\": \"application/x-www-form-urlencoded\"\r
+
+      \        },\r
+
+      \        body: {\r
+
+      \            mode: \"urlencoded\",\r
+
+      \            urlencoded: [\r
+
+      \                { key: \"client_id\", value: \"kitcord\" },\r
+
+      \                { key: \"grant_type\", value: \"password\" },\r
+
+      \                { key: \"username\", value: \"admin\" },\r
+
+      \                { key: \"password\", value: \"admin\" }\r
+
+      \            ]\r
+
+      \        }\r
+
+      \    }, function (err, res) {\r
+
+      \        if (!err) {\r
+
+      \            const json = res.json();\r
+
+      \            pm.collectionVariables.set(\"access_token\", json.access_token);\r
+
+      \        }\r
+
+      \    });\r
+
+      }"
+auth:
+  - id: db39c43c-4014-4a49-a243-1a0695f50a84
+    type: bearer
+    name: Bearer Token
+    credentials:
+      token: "{{access_token}}"
+    rules:
+      url: http://localhost:9090/*

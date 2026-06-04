@@ -1,0 +1,5 @@
+$kind: http-request
+name: get_chat_by_id
+url: http://localhost:9090/chats/1
+method: GET
+order: 4455777721831000

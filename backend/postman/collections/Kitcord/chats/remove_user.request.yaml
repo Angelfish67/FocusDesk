@@ -1,0 +1,5 @@
+$kind: http-request
+name: remove_user
+url: http://localhost:9090/chats/1/users/2
+method: DELETE
+order: 239743255237705
