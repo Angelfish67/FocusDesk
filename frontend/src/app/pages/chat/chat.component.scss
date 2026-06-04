@@ -1,0 +1,174 @@
+.chat-layout {
+  height: 100vh;
+  display: flex;
+  background: #313338;
+  color: white;
+}
+
+.sidebar {
+  width: 280px;
+  background: #1e1f22;
+
+  display: flex;
+  flex-direction: column;
+
+  border-right: 1px solid rgba(255,255,255,.08);
+}
+
+.sidebar-header {
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 0 20px;
+
+  font-weight: 800;
+  font-size: 22px;
+
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.sidebar-header img {
+  width: 42px;
+  height: 42px;
+}
+
+.sidebar-section {
+  padding: 16px;
+}
+
+.sidebar-section h4 {
+  margin: 0 0 12px;
+  color: #949ba4;
+  font-size: 13px;
+}
+
+.chat-item {
+  width: 100%;
+  height: 46px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: transparent;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 0 12px;
+
+  cursor: pointer;
+}
+
+.chat-item:hover {
+  background: #3f4248;
+}
+
+.chat-item.active {
+  background: #5865f2;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+}
+
+.chat-container {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 24px;
+
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.chat-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.messages {
+  flex: 1;
+
+  padding: 24px;
+
+  overflow-y: auto;
+}
+
+.message {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  background: #5865f2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
+}
+
+.message-top {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.message-top span {
+  color: #949ba4;
+  font-size: 12px;
+}
+
+.message-content p {
+  margin: 6px 0 0;
+}
+
+.message-input {
+  padding: 20px;
+
+  border-top: 1px solid rgba(255,255,255,.08);
+
+  display: flex;
+  gap: 12px;
+}
+
+.message-input input {
+  flex: 1;
+
+  height: 50px;
+
+  border: none;
+  outline: none;
+
+  border-radius: 12px;
+
+  padding: 0 16px;
+
+  background: #1e1f22;
+  color: white;
+}

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { switchMap } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -42,7 +43,14 @@ export class RegisterComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.username || !this.email || !this.firstName || !this.lastName || !this.password || !this.confirmPassword) {
+    if (
+      !this.username.trim() ||
+      !this.email.trim() ||
+      !this.firstName.trim() ||
+      !this.lastName.trim() ||
+      !this.password ||
+      !this.confirmPassword
+    ) {
       this.errorMessage = 'Bitte alle Felder ausfüllen.';
       return;
     }
@@ -54,20 +62,30 @@ export class RegisterComponent {
 
     this.loading = true;
 
+    const email = this.email.trim();
+    const password = this.password;
+
     this.authApiService.register({
-      username: this.username,
-      email: this.email,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      password: this.password
-    }).subscribe({
+      username: this.username.trim(),
+      email,
+      firstName: this.firstName.trim(),
+      lastName: this.lastName.trim(),
+      password
+    }).pipe(
+      switchMap(() => this.authApiService.login({
+        email,
+        password
+      }))
+    ).subscribe({
       next: () => {
         this.loading = false;
-        this.successMessage = 'Konto wurde erstellt. Du kannst dich jetzt einloggen.';
-        this.router.navigate(['/login']);
+        this.successMessage = 'Konto wurde erstellt.';
+        this.router.navigateByUrl('/chat');
       },
       error: error => {
         this.loading = false;
+        console.error('Registrierung/Login fehlgeschlagen:', error);
+
         this.errorMessage = typeof error.error === 'string'
           ? error.error
           : 'Registrierung fehlgeschlagen.';

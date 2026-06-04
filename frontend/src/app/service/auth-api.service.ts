@@ -51,4 +51,17 @@ export class AuthApiService {
       })
     );
   }
+
+  logout(): void {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+  }
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('access_token');
+  }
+
+  getAccessToken(): string | null {
+    return localStorage.getItem('access_token');
+  }
 }
