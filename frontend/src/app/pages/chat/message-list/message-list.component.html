@@ -1,0 +1,26 @@
+<div class="messages">
+
+  @for (message of messages; track message) {
+
+    <div class="message">
+
+      <div class="avatar">
+        {{ message.avatar }}
+      </div>
+
+      <div class="message-content">
+
+        <div class="message-top">
+          <strong>{{ message.username }}</strong>
+          <span>{{ message.time }}</span>
+        </div>
+
+        <p>{{ message.content }}</p>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>
