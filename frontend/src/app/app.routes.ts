@@ -34,7 +34,7 @@ export const routes: Routes = [
     component: ChatLayoutComponent,
     canActivate: [AppAuthGuard],
     data: {
-      roles: ['ROLE_read', 'ROLE_update', 'ROLE_admin']
+      roles: ['read', 'update', 'admin']
     }
   },
 
@@ -43,7 +43,7 @@ export const routes: Routes = [
     component: ChatLayoutComponent,
     canActivate: [AppAuthGuard],
     data: {
-      roles: ['ROLE_admin']
+      roles: ['admin']
     }
   },
 
