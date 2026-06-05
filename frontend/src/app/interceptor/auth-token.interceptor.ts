@@ -1,6 +1,6 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 
-export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
+export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
   const publicUrls = [
     '/users/create',
     '/users/login',
@@ -8,23 +8,28 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
     '/realms/'
   ];
 
-  const isPublicUrl = publicUrls.some(url => req.url.includes(url));
+  const isPublicUrl = publicUrls.some(url => request.url.includes(url));
 
   if (isPublicUrl) {
-    return next(req);
+    return next(request);
   }
 
-  const token = localStorage.getItem('access_token');
+  const token =
+    localStorage.getItem('access_token') ||
+    localStorage.getItem('accessToken') ||
+    sessionStorage.getItem('access_token') ||
+    sessionStorage.getItem('accessToken') ||
+    sessionStorage.getItem('access_token_stored_at');
 
-  if (!token) {
-    return next(req);
+  if (!token || token === 'null' || token === 'undefined') {
+    return next(request);
   }
 
-  const authReq = req.clone({
+  const authenticatedRequest = request.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`
     }
   });
 
-  return next(authReq);
+  return next(authenticatedRequest);
 };
