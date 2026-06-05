@@ -19,6 +19,11 @@ public class UserService {
         this.keycloakAdminService = keycloakAdminService;
     }
 
+    public User getUserByKeycloakId(String keycloakId) {
+    return userRepository.findByKeycloakId(keycloakId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+}
+
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));

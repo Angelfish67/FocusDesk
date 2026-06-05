@@ -32,6 +32,10 @@ public class MessageService {
         return messageRepository.findAll();
     }
 
+    public List<Message> getMessagesByChatId(Long chatId) {
+        return messageRepository.findByChatIdOrderBySentAtAsc(chatId);
+    }
+
     public Message getMessageById(Long id) {
         return messageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Message not found"));

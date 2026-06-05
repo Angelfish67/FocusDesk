@@ -7,22 +7,59 @@
 
   <div class="sidebar-section">
 
-    <h4>Chats</h4>
+    <div class="section-title">
+      <h4>Chats</h4>
 
-    <button class="chat-item active">
-      <mat-icon>forum</mat-icon>
-      <span>General</span>
-    </button>
+      <button class="create-button" type="button" (click)="toggleCreateChat()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
 
-    <button class="chat-item">
-      <mat-icon>groups</mat-icon>
-      <span>Gaming</span>
-    </button>
+    @if (showCreateChat) {
+      <div class="create-chat-box">
 
-    <button class="chat-item">
-      <mat-icon>school</mat-icon>
-      <span>Schule</span>
-    </button>
+        <input
+          type="text"
+          placeholder="Chatname"
+          [(ngModel)]="chatName"
+        >
+
+        <select [(ngModel)]="chatType">
+          <option value="GROUP">Gruppenchat</option>
+          <option value="DIRECT">Direktchat</option>
+        </select>
+
+        <input
+          type="text"
+          placeholder="User-IDs, z.B. 1, 2, 3"
+          [(ngModel)]="userIdsInput"
+        >
+
+        @if (errorMessage) {
+          <p class="error-message">{{ errorMessage }}</p>
+        }
+
+        <button
+          class="save-chat-button"
+          type="button"
+          (click)="createChat()"
+          [disabled]="loading"
+        >
+          {{ loading ? 'Wird erstellt...' : 'Chat erstellen' }}
+        </button>
+
+      </div>
+    }
+
+    @for (chat of chats; track chat.id) {
+      <button class="chat-item">
+        <mat-icon>
+          {{ chat.chatType === 'GROUP' ? 'groups' : 'person' }}
+        </mat-icon>
+
+        <span>{{ chat.name || 'Unbenannter Chat' }}</span>
+      </button>
+    }
 
   </div>
 

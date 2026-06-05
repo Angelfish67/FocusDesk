@@ -35,13 +35,101 @@
   overflow-y: auto;
 }
 
-.sidebar-section h4 {
+.section-title {
   margin: 0 0 12px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title h4 {
+  margin: 0;
   color: #949ba4;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .08em;
+}
+
+.create-button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #b5bac1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.create-button:hover {
+  background: #35373c;
+  color: white;
+}
+
+.create-button mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.create-chat-box {
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #232428;
+  border: 1px solid #1e1f22;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-chat-box input,
+.create-chat-box select {
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #383a40;
+  color: white;
+  font-size: 14px;
+}
+
+.create-chat-box input::placeholder {
+  color: #949ba4;
+}
+
+.create-chat-box select {
+  cursor: pointer;
+}
+
+.error-message {
+  margin: 0;
+  color: #ff6b6b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.save-chat-button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #5865f2;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-chat-button:hover {
+  background: #4752c4;
+}
+
+.save-chat-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .chat-item {
@@ -80,4 +168,7 @@
 .chat-item span {
   font-size: 15px;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

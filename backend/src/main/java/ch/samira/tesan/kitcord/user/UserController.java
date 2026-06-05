@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @Tag(
         name = "UserController",
@@ -140,4 +141,10 @@ public class UserController {
     ) {
         userService.changePassword(passwordChangeRequest);
     }
+
+    @PreAuthorize("hasAnyAuthority('ROLE_read', 'ROLE_admin')")
+@GetMapping("/me")
+public User getCurrentUser(Authentication authentication) {
+    return userService.getUserByKeycloakId(authentication.getName());
+}
 }

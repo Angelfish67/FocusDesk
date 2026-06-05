@@ -2,6 +2,7 @@ import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
+  withInterceptors,
   withInterceptorsFromDi,
   withXsrfConfiguration
 } from '@angular/common/http';
@@ -33,6 +34,7 @@ import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
 import { HttpXSRFInterceptor } from './interceptor/http.csrf.interceptor';
+import { authTokenInterceptor } from './interceptor/auth-token.interceptor';
 import { AppAuthService } from './service/app.auth.service';
 import { MatPaginatorI18nService } from './service/mat.intl.service';
 
@@ -114,6 +116,9 @@ export const appConfig: ApplicationConfig = {
     }),
 
     provideHttpClient(
+      withInterceptors([
+        authTokenInterceptor
+      ]),
       withInterceptorsFromDi(),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
@@ -123,7 +128,7 @@ export const appConfig: ApplicationConfig = {
 
     provideOAuthClient({
       resourceServer: {
-        sendAccessToken: true,
+        sendAccessToken: false,
         allowedUrls: [
           'http://localhost:9090',
           environment.backendBaseUrl
