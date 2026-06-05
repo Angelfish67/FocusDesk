@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import {JwtHelperService} from '@auth0/angular-jwt';
-import {AuthConfig, OAuthErrorEvent, OAuthService} from 'angular-oauth2-oidc';
-import {BehaviorSubject, Observable, of} from 'rxjs';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { AuthConfig, OAuthErrorEvent, OAuthService } from 'angular-oauth2-oidc';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,88 +11,128 @@ export class AppAuthService {
   private authConfig = inject(AuthConfig);
 
   private jwtHelper: JwtHelperService = new JwtHelperService();
+
   private usernameSubject: BehaviorSubject<string> = new BehaviorSubject('');
   public readonly usernameObservable: Observable<string> = this.usernameSubject.asObservable();
+
   private useraliasSubject: BehaviorSubject<string> = new BehaviorSubject('');
   public readonly useraliasObservable: Observable<string> = this.useraliasSubject.asObservable();
+
   private accessTokenSubject: BehaviorSubject<string> = new BehaviorSubject('');
   public readonly accessTokenObservable: Observable<string> = this.accessTokenSubject.asObservable();
+
+  private _decodedAccessToken: any;
+  private _accessToken = '';
 
   constructor() {
     this.handleEvents(null);
   }
 
-  private _decodedAccessToken: any;
-
   get decodedAccessToken() {
     return this._decodedAccessToken;
   }
-
-  private _accessToken = '';
 
   get accessToken() {
     return this._accessToken;
   }
 
-  async initAuth(): Promise<any> {
-    return new Promise<void>(() => {
-      this.oauthService.configure(this.authConfig);
-      this.oauthService.events
-        .subscribe(e => this.handleEvents(e));
-      this.oauthService.loadDiscoveryDocumentAndTryLogin();
-      this.oauthService.setupAutomaticSilentRefresh();
+  async initAuth(): Promise<void> {
+    this.oauthService.configure(this.authConfig);
+
+    this.oauthService.events.subscribe(event => {
+      this.handleEvents(event);
     });
+
+    await this.oauthService.loadDiscoveryDocumentAndTryLogin();
+    this.oauthService.setupAutomaticSilentRefresh();
+
+    this.handleEvents(null);
   }
 
   public getRoles(): Observable<Array<string>> {
-    if (this._decodedAccessToken !== null) {
-      return new Observable<Array<string>>(observer => {
-        if (this._decodedAccessToken.resource_access.demoapp.roles) {
-          if (Array.isArray(this._decodedAccessToken.resource_access.demoapp.roles)) {
-            const resultArr = this._decodedAccessToken.resource_access.demoapp.roles.map((r: string) => r.replace('ROLE_', ''));
-            observer.next(resultArr);
-          } else {
-            observer.next([this._decodedAccessToken.resource_access.demoapp.roles.replace('ROLE_', '')]);
-          }
-        }
-      });
+    if (this._decodedAccessToken?.resource_access?.kitcord?.roles) {
+      const roles = this._decodedAccessToken.resource_access.kitcord.roles;
+
+      if (Array.isArray(roles)) {
+        return of(roles.map((role: string) => role.replace('ROLE_', '')));
+      }
+
+      return of([roles.replace('ROLE_', '')]);
     }
+
     return of([]);
   }
 
   public getIdentityClaims(): Record<string, any> {
-    return this.oauthService.getIdentityClaims();
+    return this.oauthService.getIdentityClaims() ?? {};
   }
 
-  public logout() {
+  public logout(): void {
     this.oauthService.logOut();
     this.useraliasSubject.next('');
     this.usernameSubject.next('');
+    this.accessTokenSubject.next('');
   }
 
-  public login() {
+  public login(): void {
     this.oauthService.initLoginFlow();
   }
 
-  private handleEvents(event: any) {
+  private handleEvents(event: any): void {
     if (event instanceof OAuthErrorEvent) {
       console.error(event);
-    } else {
-      this._accessToken = this.oauthService.getAccessToken();
-      this.accessTokenSubject.next(this._accessToken);
-      this._decodedAccessToken = this.jwtHelper.decodeToken(this._accessToken);
+      return;
+    }
 
-      if (this._decodedAccessToken?.family_name && this._decodedAccessToken?.given_name) {
-        const username = this._decodedAccessToken?.given_name + ' ' + this._decodedAccessToken?.family_name;
-        this.usernameSubject.next(username);
-      }
+    this._accessToken = this.oauthService.getAccessToken();
+    this.accessTokenSubject.next(this._accessToken);
 
-      const claims = this.getIdentityClaims();
-      if (claims !== null) {
-        if (claims['preferred_username'] !== '') {
-          this.useraliasSubject.next(claims['preferred_username']);
-        }
-      }
+    if (!this._accessToken) {
+      return;
+    }
+
+    this._decodedAccessToken = this.jwtHelper.decodeToken(this._accessToken);
+
+    const claims = this.getIdentityClaims();
+
+    const givenName =
+      this._decodedAccessToken?.given_name ??
+      claims['given_name'] ??
+      '';
+
+    const familyName =
+      this._decodedAccessToken?.family_name ??
+      claims['family_name'] ??
+      '';
+
+    const preferredUsername =
+      this._decodedAccessToken?.preferred_username ??
+      claims['preferred_username'] ??
+      '';
+
+    const email =
+      this._decodedAccessToken?.email ??
+      claims['email'] ??
+      '';
+
+    let displayName = '';
+
+    if (givenName && familyName) {
+      displayName = `${givenName} ${familyName}`;
+    } else if (givenName) {
+      displayName = givenName;
+    } else if (preferredUsername) {
+      displayName = preferredUsername;
+    } else if (email) {
+      displayName = email;
+    }
+
+    if (displayName) {
+      this.usernameSubject.next(displayName);
+    }
+
+    if (preferredUsername) {
+      this.useraliasSubject.next(preferredUsername);
     }
   }
 }

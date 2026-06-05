@@ -1,7 +1,7 @@
 <div class="user-profile">
 
   <div class="avatar">
-    S
+    {{ initials }}
   </div>
 
   <div class="user-info">
@@ -15,8 +15,8 @@
     </div>
   </div>
 
-  <button class="settings-button">
-    <mat-icon>settings</mat-icon>
+  <button class="settings-button" type="button" (click)="logout()">
+    <mat-icon>logout</mat-icon>
   </button>
 
 </div>
