@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { OAuthService } from 'angular-oauth2-oidc';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-profile',
@@ -11,41 +11,59 @@ import { OAuthService } from 'angular-oauth2-oidc';
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss']
 })
-export class UserProfileComponent {
-  private oauthService = inject(OAuthService);
-
+export class UserProfileComponent implements OnInit {
   username = 'Benutzer';
   status = 'Online';
   initials = '?';
 
-  constructor() {
-    this.loadUserFromKeycloak();
+  constructor(private router: Router) {}
 
-    this.oauthService.events.subscribe(() => {
-      this.loadUserFromKeycloak();
-    });
+  ngOnInit(): void {
+    this.loadUserFromToken();
   }
 
   logout(): void {
-    this.oauthService.logOut();
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    this.router.navigate(['/login']);
   }
 
-  private loadUserFromKeycloak(): void {
-    const claims: any = this.oauthService.getIdentityClaims();
+  private loadUserFromToken(): void {
+    const token = localStorage.getItem('access_token');
 
-    if (!claims) {
+    if (!token) {
       return;
     }
 
+    const payload = this.decodeJwtPayload(token);
+
     const displayName =
-      claims['preferred_username'] ||
-      claims['name'] ||
-      claims['given_name'] ||
-      claims['email'] ||
+      payload?.preferred_username ||
+      payload?.name ||
+      payload?.given_name ||
+      payload?.email ||
       'Benutzer';
 
     this.username = displayName;
     this.initials = this.createInitials(displayName);
+  }
+
+  private decodeJwtPayload(token: string): any {
+    try {
+      const payload = token.split('.')[1];
+      const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const decodedPayload = decodeURIComponent(
+        atob(normalizedPayload)
+          .split('')
+          .map(char => '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+
+      return JSON.parse(decodedPayload);
+    } catch (error) {
+      console.error('Token konnte nicht gelesen werden:', error);
+      return null;
+    }
   }
 
   private createInitials(value: string): string {
