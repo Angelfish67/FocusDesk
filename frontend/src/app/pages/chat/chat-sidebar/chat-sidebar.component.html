@@ -10,13 +10,18 @@
     <div class="section-title">
       <h4>Chats</h4>
 
-      <button class="create-button" type="button" (click)="toggleCreateChat()">
+      <button
+        *appHasRole="['update', 'admin']"
+        class="create-button"
+        type="button"
+        (click)="toggleCreateChat()"
+      >
         <mat-icon>add</mat-icon>
       </button>
     </div>
 
     @if (showCreateChat) {
-      <div class="create-chat-box">
+      <div *appHasRole="['update', 'admin']" class="create-chat-box">
 
         <input
           type="text"

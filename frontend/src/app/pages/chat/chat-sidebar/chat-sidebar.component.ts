@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { HasRoleDirective } from '../../../directive/has-role.directive';
 
 import { UserProfileComponent } from '../user-profile/user-profile.component';
 import { ChatApiService, ChatResponse, ChatType } from '../../../service/chat-api.service';
@@ -16,7 +17,8 @@ import { ChatApiService, ChatResponse, ChatType } from '../../../service/chat-ap
     FormsModule,
     MatIconModule,
     MatButtonModule,
-    UserProfileComponent
+    UserProfileComponent,
+    HasRoleDirective
   ],
   templateUrl: './chat-sidebar.component.html',
   styleUrls: ['./chat-sidebar.component.scss']
