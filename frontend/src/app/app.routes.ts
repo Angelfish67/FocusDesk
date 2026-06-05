@@ -6,31 +6,52 @@ import { RegisterComponent } from './pages/account/register/register.component';
 import { NoAccessComponent } from './pages/no-access/no-access.component';
 import { ChatLayoutComponent } from './pages/chat/chat-layout/chat-layout.component';
 
+import { AppAuthGuard } from './guard/app.auth.guard';
+
 export const routes: Routes = [
   {
     path: '',
     component: HomepageComponent
   },
+
   {
     path: 'homepage',
     component: HomepageComponent
   },
+
   {
     path: 'login',
     component: LoginComponent
   },
+
   {
     path: 'register',
     component: RegisterComponent
   },
+
   {
     path: 'chat',
-    component: ChatLayoutComponent
+    component: ChatLayoutComponent,
+    canActivate: [AppAuthGuard],
+    data: {
+      roles: ['ROLE_read', 'ROLE_update', 'ROLE_admin']
+    }
   },
+
+  {
+    path: 'admin',
+    component: ChatLayoutComponent,
+    canActivate: [AppAuthGuard],
+    data: {
+      roles: ['ROLE_admin']
+    }
+  },
+
   {
     path: 'noaccess',
     component: NoAccessComponent
   },
+
   {
     path: '**',
     redirectTo: ''

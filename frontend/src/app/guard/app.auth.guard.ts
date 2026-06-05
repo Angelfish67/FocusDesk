@@ -1,50 +1,58 @@
-import {inject} from '@angular/core';
-import {ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, Router, RouterStateSnapshot} from '@angular/router';
-import {OAuthService} from 'angular-oauth2-oidc';
-import {AppAuthService} from '../service/app.auth.service';
+import { inject } from '@angular/core';
+import {
+  ActivatedRouteSnapshot,
+  CanActivateChildFn,
+  CanActivateFn,
+  Router,
+  RouterStateSnapshot,
+  UrlTree
+} from '@angular/router';
+import { map, take } from 'rxjs';
 
-export const appCanActivate: CanActivateFn = (
+import { OAuthService } from 'angular-oauth2-oidc';
+import { AppAuthService } from '../service/app.auth.service';
+
+export const AppAuthGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   state: RouterStateSnapshot
 ) => {
-  const authService: AppAuthService = inject(AppAuthService);
-  const oauthService: OAuthService = inject(OAuthService);
+  const authService = inject(AppAuthService);
+  const oauthService = inject(OAuthService);
   const router = inject(Router);
 
-  let userRoles: string[] = [];
-
-  authService.getRoles().subscribe(roles => {
-    userRoles = roles;
-  });
-
-  if (oauthService.hasValidAccessToken()) {
-    const hasRoles = checkRoles(route, userRoles);
-    if (!hasRoles) {
-      return router.parseUrl('/noaccess');
-    }
-    return hasRoles;
+  if (!oauthService.hasValidAccessToken()) {
+    return router.parseUrl('/noaccess');
   }
-  return router.parseUrl('/noaccess');
+
+  return authService.getRoles().pipe(
+    take(1),
+    map((userRoles: string[]) => {
+      const hasRoles = checkRoles(route, userRoles);
+
+      if (!hasRoles) {
+        return router.parseUrl('/noaccess');
+      }
+
+      return true;
+    })
+  );
 };
 
 function checkRoles(route: ActivatedRouteSnapshot, userRoles: string[]): boolean {
-  const roles = route.data['roles'] as Array<string>;
+  const requiredRoles = route.data['roles'] as string[] | undefined;
 
-  if (roles === undefined || roles === null || roles.length === 0) {
+  if (!requiredRoles || requiredRoles.length === 0) {
     return true;
   }
 
-  if (userRoles === undefined) {
+  if (!userRoles || userRoles.length === 0) {
     return false;
   }
 
-  for (const role of roles) {
-    if (userRoles.indexOf(role) > -1) {
-      return true;
-    }
-  }
-  return false;
+  return requiredRoles.some(role => userRoles.includes(role));
 }
 
-export const appCanActivateChild: CanActivateChildFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => appCanActivate(route, state);
+export const AppAuthGuardChild: CanActivateChildFn = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+) => AppAuthGuard(route, state);
