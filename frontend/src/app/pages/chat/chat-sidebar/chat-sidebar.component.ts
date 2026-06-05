@@ -25,6 +25,7 @@ export class ChatSidebarComponent implements OnInit {
   private chatApiService = inject(ChatApiService);
 
   chats: ChatResponse[] = [];
+  selectedChat: ChatResponse | null = null;
 
   showCreateChat = false;
   loading = false;
@@ -36,18 +37,35 @@ export class ChatSidebarComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadChats();
+
+    this.chatApiService.selectedChat$.subscribe(chat => {
+      this.selectedChat = chat;
+    });
   }
 
   loadChats(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
     this.chatApiService.getChats().subscribe({
       next: chats => {
         this.chats = chats;
+        this.loading = false;
+
+        if (chats.length > 0) {
+          this.selectChat(chats[0]);
+        }
       },
       error: error => {
         console.error('Chats konnten nicht geladen werden:', error);
         this.errorMessage = 'Chats konnten nicht geladen werden.';
+        this.loading = false;
       }
     });
+  }
+
+  selectChat(chat: ChatResponse): void {
+    this.chatApiService.selectChat(chat);
   }
 
   toggleCreateChat(): void {
@@ -89,6 +107,7 @@ export class ChatSidebarComponent implements OnInit {
         this.chatType = 'GROUP';
         this.showCreateChat = false;
         this.loading = false;
+        this.selectChat(createdChat);
       },
       error: error => {
         console.error('Chat konnte nicht erstellt werden:', error);

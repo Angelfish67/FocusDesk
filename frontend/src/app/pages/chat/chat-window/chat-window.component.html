@@ -2,20 +2,41 @@
 
   <header class="chat-header">
     <div class="chat-title">
-      <mat-icon>forum</mat-icon>
-      <span>General</span>
+      <mat-icon>
+        {{ selectedChat?.chatType === 'GROUP' ? 'groups' : 'forum' }}
+      </mat-icon>
+
+      <span>{{ selectedChat?.name || 'Kein Chat ausgewählt' }}</span>
     </div>
   </header>
 
-  <app-message-list></app-message-list>
+  @if (errorMessage) {
+    <div class="chat-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <app-message-list
+    [messages]="messages"
+    [loading]="loadingMessages">
+  </app-message-list>
 
   <div class="message-input">
     <input
       type="text"
       placeholder="Nachricht schreiben..."
+      [(ngModel)]="messageText"
+      [disabled]="!selectedChat || sendingMessage"
+      (keydown.enter)="sendMessage()"
     >
 
-    <button mat-icon-button color="primary">
+    <button
+      mat-icon-button
+      color="primary"
+      type="button"
+      [disabled]="!selectedChat || !messageText.trim() || sendingMessage"
+      (click)="sendMessage()"
+    >
       <mat-icon>send</mat-icon>
     </button>
   </div>

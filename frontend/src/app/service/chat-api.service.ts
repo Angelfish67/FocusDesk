@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type ChatType = 'DIRECT' | 'GROUP';
 
@@ -32,7 +33,6 @@ export type MessageResponse = {
   content: string;
   sentAt: string;
   editedAt: string | null;
-  chatId?: number;
   sender: UserResponse;
 };
 
@@ -47,12 +47,12 @@ export type CreateMessageRequest = {
 })
 export class ChatApiService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:9090';
+  private apiUrl = environment.backendBaseUrl;
 
   private selectedChatSubject = new BehaviorSubject<ChatResponse | null>(null);
-  selectedChat$ = this.selectedChatSubject.asObservable();
+  readonly selectedChat$ = this.selectedChatSubject.asObservable();
 
-  selectChat(chat: ChatResponse): void {
+  selectChat(chat: ChatResponse | null): void {
     this.selectedChatSubject.next(chat);
   }
 
@@ -70,9 +70,5 @@ export class ChatApiService {
 
   sendMessage(request: CreateMessageRequest): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(`${this.apiUrl}/messages`, request);
-  }
-
-  getCurrentUser(): Observable<UserResponse> {
-    return this.http.get<UserResponse>(`${this.apiUrl}/users/me`);
   }
 }

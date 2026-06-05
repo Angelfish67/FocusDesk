@@ -62,6 +62,14 @@ app-message-list {
   color: #949ba4;
 }
 
+.chat-error {
+  padding: 10px 24px;
+  background: #3a1f24;
+  color: #ffb4b4;
+  border-bottom: 1px solid #1e1f22;
+  font-size: 14px;
+}
+
 .message-input button {
   flex-shrink: 0;
 }

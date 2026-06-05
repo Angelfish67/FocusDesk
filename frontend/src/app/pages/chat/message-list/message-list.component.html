@@ -1,18 +1,30 @@
 <div class="messages">
 
-  @for (message of messages; track message) {
+  @if (loading) {
+    <div class="messages-info">
+      Nachrichten werden geladen...
+    </div>
+  }
+
+  @if (!loading && messages.length === 0) {
+    <div class="messages-info">
+      Noch keine Nachrichten in diesem Chat.
+    </div>
+  }
+
+  @for (message of messages; track message.id) {
 
     <div class="message">
 
       <div class="avatar">
-        {{ message.avatar }}
+        {{ getInitial(message.sender.username) }}
       </div>
 
       <div class="message-content">
 
         <div class="message-top">
-          <strong>{{ message.username }}</strong>
-          <span>{{ message.time }}</span>
+          <strong>{{ message.sender.username }}</strong>
+          <span>{{ message.sentAt | date:'HH:mm' }}</span>
         </div>
 
         <p>{{ message.content }}</p>

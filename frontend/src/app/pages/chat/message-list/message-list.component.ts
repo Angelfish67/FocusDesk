@@ -1,31 +1,26 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-interface Message {
-  username: string;
-  avatar: string;
-  time: string;
-  content: string;
-}
+import { Component, Input } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { MessageResponse } from '../../../service/chat-api.service';
 
 @Component({
   selector: 'app-message-list',
   standalone: true,
   imports: [
-    CommonModule
+    CommonModule,
+    DatePipe
   ],
   templateUrl: './message-list.component.html',
   styleUrls: ['./message-list.component.scss']
 })
 export class MessageListComponent {
+  @Input() messages: MessageResponse[] = [];
+  @Input() loading = false;
 
-  messages: Message[] = [
-    {
-      username: 'Samira',
-      avatar: 'S',
-      time: '09:21',
-      content: 'kitcord'
-    },
-  ];
+  getInitial(username?: string): string {
+    if (!username) {
+      return '?';
+    }
 
+    return username.charAt(0).toUpperCase();
+  }
 }

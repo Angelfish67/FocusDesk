@@ -45,14 +45,22 @@
           (click)="createChat()"
           [disabled]="loading"
         >
-          {{ loading ? 'Wird erstellt...' : 'Chat erstellen' }}
+          {{ loading ? 'Wird geladen...' : 'Chat erstellen' }}
         </button>
 
       </div>
     }
 
+    @if (!showCreateChat && errorMessage) {
+      <p class="error-message">{{ errorMessage }}</p>
+    }
+
     @for (chat of chats; track chat.id) {
-      <button class="chat-item">
+      <button
+        class="chat-item"
+        [class.active]="selectedChat?.id === chat.id"
+        (click)="selectChat(chat)"
+      >
         <mat-icon>
           {{ chat.chatType === 'GROUP' ? 'groups' : 'person' }}
         </mat-icon>
