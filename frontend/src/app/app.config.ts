@@ -1,10 +1,7 @@
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 import {
-  HTTP_INTERCEPTORS,
   provideHttpClient,
-  withInterceptors,
-  withInterceptorsFromDi,
-  withXsrfConfiguration
+  withInterceptors
 } from '@angular/common/http';
 import {
   ApplicationConfig,
@@ -33,7 +30,6 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
-import { HttpXSRFInterceptor } from './interceptor/http.csrf.interceptor';
 import { authTokenInterceptor } from './interceptor/auth-token.interceptor';
 import { AppAuthService } from './service/app.auth.service';
 import { MatPaginatorI18nService } from './service/mat.intl.service';
@@ -45,21 +41,15 @@ if (environment.production) {
 export const authConfig: AuthConfig = {
   issuer: 'http://localhost:8080/realms/kitcord',
   requireHttps: false,
-
   redirectUri: environment.frontendBaseUrl,
   postLogoutRedirectUri: environment.frontendBaseUrl,
-
   clientId: 'kitcord',
-
   scope: 'openid profile roles offline_access',
   responseType: 'code',
-
   showDebugInformation: true,
   requestAccessToken: true,
-
   silentRefreshRedirectUri: window.location.origin + '/silent-refresh.html',
   silentRefreshTimeout: 500,
-
   clearHashAfterLogin: true,
   waitForTokenInMsec: 1000
 };
@@ -100,12 +90,6 @@ export const appConfig: ApplicationConfig = {
       useClass: PathLocationStrategy
     },
 
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: HttpXSRFInterceptor,
-      multi: true
-    },
-
     provideTranslateService({
       fallbackLang: 'en',
       lang: 'en',
@@ -118,21 +102,13 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([
         authTokenInterceptor
-      ]),
-      withInterceptorsFromDi(),
-      withXsrfConfiguration({
-        cookieName: 'XSRF-TOKEN',
-        headerName: 'X-XSRF-TOKEN'
-      })
+      ])
     ),
 
     provideOAuthClient({
       resourceServer: {
         sendAccessToken: false,
-        allowedUrls: [
-          'http://localhost:9090',
-          environment.backendBaseUrl
-        ]
+        allowedUrls: []
       }
     }),
 
