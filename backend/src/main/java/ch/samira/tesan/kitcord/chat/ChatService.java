@@ -30,35 +30,50 @@ public class ChatService {
 
     public Chat getChatById(Long id) {
         return chatRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Chat not found"));
     }
 
     @Transactional
     public Chat createChat(CreateChatRequest request) {
         if (request.getChatType() == null) {
-            throw new RuntimeException("Chat type is required");
+            throw new IllegalArgumentException("Chat type is required");
         }
 
         if (request.getUserIds() == null || request.getUserIds().isEmpty()) {
-            throw new RuntimeException("Users are required");
+            throw new IllegalArgumentException("Users are required");
         }
 
-        List<User> foundUsers = userRepository.findAllById(request.getUserIds());
+        List<Long> uniqueUserIds = request.getUserIds()
+                .stream()
+                .distinct()
+                .toList();
 
-        if (foundUsers.size() != request.getUserIds().size()) {
-            throw new RuntimeException("One or more users not found");
+        List<User> foundUsers = userRepository.findAllById(uniqueUserIds);
+
+        if (foundUsers.size() != uniqueUserIds.size()) {
+            throw new IllegalArgumentException("One or more users not found");
         }
 
         if (request.getChatType() == ChatType.DIRECT && foundUsers.size() != 2) {
-            throw new RuntimeException("Direct chat must have exactly 2 users");
+            throw new IllegalArgumentException("Direct chat must have exactly 2 users");
         }
 
-        Set<User> users = new HashSet<>(foundUsers);
+        if (request.getChatType() == ChatType.GROUP && foundUsers.size() < 2) {
+            throw new IllegalArgumentException("Group chat must have at least 2 users");
+        }
+
+        String chatName = request.getName();
+
+        if (chatName == null || chatName.trim().isEmpty()) {
+            chatName = request.getChatType() == ChatType.DIRECT
+                    ? "Direct Chat"
+                    : "Group Chat";
+        }
 
         Chat chat = new Chat();
-        chat.setName(request.getName());
+        chat.setName(chatName.trim());
         chat.setChatType(request.getChatType());
-        chat.setUsers(users);
+        chat.setUsers(new HashSet<>(foundUsers));
         chat.setCreatedAt(LocalDateTime.now());
 
         return chatRepository.save(chat);
@@ -68,8 +83,13 @@ public class ChatService {
     public Chat updateChat(Long id, UpdateChatRequest request) {
         Chat chat = getChatById(id);
 
-        chat.setName(request.getName());
-        chat.setChatType(request.getChatType());
+        if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            chat.setName(request.getName().trim());
+        }
+
+        if (request.getChatType() != null) {
+            chat.setChatType(request.getChatType());
+        }
 
         return chatRepository.save(chat);
     }
@@ -84,7 +104,7 @@ public class ChatService {
         Chat chat = getChatById(id);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         chat.getUsers().add(user);
 
@@ -96,7 +116,7 @@ public class ChatService {
         Chat chat = getChatById(id);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         chat.getUsers().remove(user);
 

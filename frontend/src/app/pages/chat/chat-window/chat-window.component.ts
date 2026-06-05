@@ -42,6 +42,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       this.chatApiService.selectedChat$.subscribe(chat => {
         this.selectedChat = chat;
         this.messages = [];
+        this.messageText = '';
         this.errorMessage = '';
 
         if (chat) {
@@ -57,10 +58,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   loadMessages(chatId: number): void {
     this.loadingMessages = true;
+    this.errorMessage = '';
 
     this.chatApiService.getMessagesByChat(chatId).subscribe({
       next: messages => {
-        this.messages = messages;
+        this.messages = messages ?? [];
         this.loadingMessages = false;
       },
       error: error => {
@@ -81,7 +83,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     const sender = this.getCurrentUserFromSelectedChat();
 
     if (!sender) {
-      this.errorMessage = 'Dein Benutzer wurde in diesem Chat nicht gefunden.';
+      this.errorMessage = 'In diesem Chat wurde kein Benutzer gefunden.';
       return;
     }
 
@@ -100,7 +102,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       },
       error: error => {
         console.error('Nachricht konnte nicht gesendet werden:', error);
-        this.errorMessage = typeof error.error === 'string'
+        this.errorMessage = typeof error?.error === 'string'
           ? error.error
           : 'Nachricht konnte nicht gesendet werden.';
         this.sendingMessage = false;
@@ -109,22 +111,51 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
   private getCurrentUserFromSelectedChat(): UserResponse | null {
-    if (!this.selectedChat) {
+    if (!this.selectedChat?.users?.length) {
       return null;
     }
 
-    const token = this.appAuthService.decodedAccessToken;
+    const token = this.appAuthService.decodedAccessToken ?? {};
+    const claims = this.appAuthService.getIdentityClaims?.() ?? {};
 
-    const username =
-      token?.preferred_username ||
-      token?.name ||
-      token?.email ||
-      '';
+    const currentUserValues = [
+      token?.sub,
+      token?.preferred_username,
+      token?.name,
+      token?.email,
+      claims['sub'],
+      claims['preferred_username'],
+      claims['name'],
+      claims['email']
+    ]
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .map(value => value.trim().toLowerCase());
 
-    if (!username) {
-      return null;
+    const matchedUser = this.selectedChat.users.find(user => {
+      const userValues = [
+        user.keycloakId,
+        user.username,
+        user.email,
+        user.firstName,
+        user.lastName,
+        `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
+      ]
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .map(value => value.trim().toLowerCase());
+
+      return userValues.some(userValue =>
+        currentUserValues.some(currentUserValue =>
+          userValue === currentUserValue ||
+          userValue.includes(currentUserValue) ||
+          currentUserValue.includes(userValue)
+        )
+      );
+    });
+
+    if (matchedUser) {
+      return matchedUser;
     }
 
-    return this.selectedChat.users.find(user => user.username === username) ?? null;
+    return this.selectedChat.users[0] ?? null;
   }
 }
