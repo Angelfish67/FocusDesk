@@ -9,28 +9,34 @@ import {
   RouterStateSnapshot
 } from '@angular/router';
 import { map, take } from 'rxjs';
+
 import { AppAuthService } from '../service/app.auth.service';
 
 export const AppAuthGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
 ): MaybeAsync<GuardResult> => {
-  return checkAccess(route);
+  return checkAccess(route, state);
 };
 
 export const AppAuthGuardChild: CanActivateChildFn = (
   childRoute: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
 ): MaybeAsync<GuardResult> => {
-  return checkAccess(childRoute);
+  return checkAccess(childRoute, state);
 };
 
-function checkAccess(route: ActivatedRouteSnapshot): MaybeAsync<GuardResult> {
+async function checkAccess(
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): Promise<GuardResult> {
   const authService = inject(AppAuthService);
   const router = inject(Router);
 
+  await authService.initAuth();
+
   if (!authService.hasValidAccessToken()) {
-    return router.parseUrl('/noaccess');
+    return router.parseUrl('/login');
   }
 
   const requiredRoles = route.data['roles'] as string[] | undefined;
@@ -39,14 +45,12 @@ function checkAccess(route: ActivatedRouteSnapshot): MaybeAsync<GuardResult> {
     return true;
   }
 
-  return authService.hasAnyRole(requiredRoles).pipe(
-    take(1),
-    map(hasRole => {
-      if (!hasRole) {
-        return router.parseUrl('/noaccess');
-      }
-
-      return true;
-    })
-  );
+  return new Promise<GuardResult>(resolve => {
+    authService.hasAnyRole(requiredRoles)
+      .pipe(
+        take(1),
+        map(hasRole => hasRole ? true : router.parseUrl('/noaccess'))
+      )
+      .subscribe(result => resolve(result));
+  });
 }

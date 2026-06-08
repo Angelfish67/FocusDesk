@@ -40,18 +40,22 @@ const keycloakIssuer = 'http://localhost:8080/realms/kitcord';
 export const authConfig: AuthConfig = {
   issuer: keycloakIssuer,
   requireHttps: false,
-  redirectUri: frontendBaseUrl,
+
+redirectUri: `${frontendBaseUrl}/chat`,
   postLogoutRedirectUri: frontendBaseUrl,
+
   clientId: 'kitcord',
-  scope: 'openid profile roles offline_access',
+  scope: 'openid profile email roles offline_access',
   responseType: 'code',
+
   showDebugInformation: true,
   requestAccessToken: true,
+  clearHashAfterLogin: true,
+  strictDiscoveryDocumentValidation: false,
+
   silentRefreshRedirectUri: `${frontendBaseUrl}/silent-refresh.html`,
   silentRefreshTimeout: 500,
-  clearHashAfterLogin: true,
-  waitForTokenInMsec: 1000,
-  strictDiscoveryDocumentValidation: false
+  waitForTokenInMsec: 1000
 };
 
 export function storageFactory(): OAuthStorage {
@@ -110,7 +114,7 @@ export const appConfig: ApplicationConfig = {
     }),
 
     provideEnvironmentInitializer(() => {
-      inject(AppAuthService).initAuth().finally();
+      inject(AppAuthService).initAuth().catch(error => console.error(error));
     })
   ]
 };

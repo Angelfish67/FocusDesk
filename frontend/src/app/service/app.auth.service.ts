@@ -1,6 +1,12 @@
 import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { AuthConfig, OAuthErrorEvent, OAuthService } from 'angular-oauth2-oidc';
+import {
+  AuthConfig,
+  OAuthErrorEvent,
+  OAuthEvent,
+  OAuthService
+} from 'angular-oauth2-oidc';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 
 @Injectable({
@@ -9,6 +15,7 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 export class AppAuthService {
   private oauthService = inject(OAuthService);
   private authConfig = inject(AuthConfig);
+  private router = inject(Router);
 
   private jwtHelper = new JwtHelperService();
 
@@ -61,6 +68,10 @@ export class AppAuthService {
 
     this.initialized = true;
     this.handleEvents(null);
+
+    if (this.hasValidAccessToken() && this.isOAuthCallbackUrl()) {
+      await this.router.navigateByUrl('/chat', { replaceUrl: true });
+    }
   }
 
   public getAccessToken(): string {
@@ -124,19 +135,25 @@ export class AppAuthService {
 
   public async login(): Promise<void> {
     await this.initAuth();
+
+    if (this.hasValidAccessToken()) {
+      await this.router.navigateByUrl('/chat');
+      return;
+    }
+
     this.oauthService.initCodeFlow();
   }
 
- public register(): void {
-  const registerUrl =
-    'http://localhost:8080/realms/kitcord/protocol/openid-connect/registrations' +
-    '?client_id=kitcord' +
-    '&response_type=code' +
-    '&scope=openid%20profile%20roles%20offline_access' +
-    '&redirect_uri=' + encodeURIComponent('http://localhost:4200');
+  public register(): void {
+    const registerUrl =
+      'http://localhost:8080/realms/kitcord/protocol/openid-connect/registrations' +
+      '?client_id=kitcord' +
+      '&response_type=code' +
+      '&scope=openid%20profile%20email%20roles%20offline_access' +
+      '&redirect_uri=' + encodeURIComponent('http://localhost:4200');
 
-  window.location.href = registerUrl;
-}
+    window.location.href = registerUrl;
+  }
 
   public logout(): void {
     this.oauthService.logOut();
@@ -155,7 +172,7 @@ export class AppAuthService {
     this.initPromise = null;
   }
 
-  private handleEvents(event: any): void {
+  private handleEvents(event: OAuthEvent | null): void {
     if (event instanceof OAuthErrorEvent) {
       console.error(event);
       return;
@@ -191,13 +208,13 @@ export class AppAuthService {
       displayName = email;
     }
 
-    if (displayName) {
-      this.usernameSubject.next(displayName);
-    }
+    this.usernameSubject.next(displayName);
+    this.useraliasSubject.next(preferredUsername);
+  }
 
-    if (preferredUsername) {
-      this.useraliasSubject.next(preferredUsername);
-    }
+  private isOAuthCallbackUrl(): boolean {
+    const url = window.location.href;
+    return url.includes('code=') && url.includes('state=');
   }
 
   private normalizeRole(role: string): string {
