@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { MatIconModule } from '@angular/material/icon';
@@ -28,6 +29,7 @@ import { ChatApiService, ChatResponse, MessageResponse, UserResponse } from '../
 export class ChatWindowComponent implements OnInit, OnDestroy {
   private chatApiService = inject(ChatApiService);
   private appAuthService = inject(AppAuthService);
+  private router = inject(Router);
 
   selectedChat: ChatResponse | null = null;
   messages: MessageResponse[] = [];
@@ -38,6 +40,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   errorMessage = '';
 
   canSendMessage = false;
+  canOpenAdmin = false;
 
   private subscriptions = new Subscription();
 
@@ -45,6 +48,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.appAuthService.hasAnyRole(['update', 'admin']).subscribe(hasRole => {
         this.canSendMessage = hasRole;
+      })
+    );
+
+    this.subscriptions.add(
+      this.appAuthService.hasAnyRole(['admin']).subscribe(hasRole => {
+        this.canOpenAdmin = hasRole;
       })
     );
 
@@ -64,6 +73,14 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  openAdmin(): void {
+    if (!this.canOpenAdmin) {
+      return;
+    }
+
+    this.router.navigate(['/admin']);
   }
 
   loadMessages(chatId: number): void {

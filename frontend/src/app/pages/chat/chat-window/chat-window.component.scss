@@ -73,3 +73,14 @@ app-message-list {
 .message-input button {
   flex-shrink: 0;
 }
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+}
