@@ -10,29 +10,29 @@ export class AppAuthService {
   private oauthService = inject(OAuthService);
   private authConfig = inject(AuthConfig);
 
-  private jwtHelper: JwtHelperService = new JwtHelperService();
+  private jwtHelper = new JwtHelperService();
 
-  private usernameSubject: BehaviorSubject<string> = new BehaviorSubject('');
+  private usernameSubject = new BehaviorSubject<string>('');
   public readonly usernameObservable: Observable<string> = this.usernameSubject.asObservable();
 
-  private useraliasSubject: BehaviorSubject<string> = new BehaviorSubject('');
+  private useraliasSubject = new BehaviorSubject<string>('');
   public readonly useraliasObservable: Observable<string> = this.useraliasSubject.asObservable();
 
-  private accessTokenSubject: BehaviorSubject<string> = new BehaviorSubject('');
+  private accessTokenSubject = new BehaviorSubject<string>('');
   public readonly accessTokenObservable: Observable<string> = this.accessTokenSubject.asObservable();
 
-  private _decodedAccessToken: any;
+  private _decodedAccessToken: any = null;
   private _accessToken = '';
 
   constructor() {
     this.handleEvents(null);
   }
 
-  get decodedAccessToken() {
+  get decodedAccessToken(): any {
     return this._decodedAccessToken;
   }
 
-  get accessToken() {
+  get accessToken(): string {
     return this._accessToken;
   }
 
@@ -50,27 +50,25 @@ export class AppAuthService {
   }
 
   public getRoles(): Observable<string[]> {
-  const token = this.oauthService.getAccessToken();
+    const token = this.oauthService.getAccessToken();
 
-  if (!token) {
-    return of([]);
+    if (!token) {
+      return of([]);
+    }
+
+    const decoded = this.jwtHelper.decodeToken(token);
+
+    const realmRoles: string[] = decoded?.realm_access?.roles ?? [];
+
+    const resourceRoles: string[] = Object.values(decoded?.resource_access ?? {})
+      .flatMap((client: any) => client?.roles ?? []);
+
+    const roles = [...realmRoles, ...resourceRoles]
+      .filter(role => typeof role === 'string')
+      .map(role => role.replace(/^ROLE_/i, '').toLowerCase());
+
+    return of([...new Set(roles)]);
   }
-
-  const decodedToken = this.jwtHelper.decodeToken(token);
-
-  const realmRoles: string[] = decodedToken?.realm_access?.roles ?? [];
-
-  const clientRoles: string[] = Object.values(decodedToken?.resource_access ?? {})
-    .flatMap((client: any) => client?.roles ?? []);
-
-  const roles = [...realmRoles, ...clientRoles]
-    .filter(role => typeof role === 'string')
-    .map(role => role.replace(/^ROLE_/i, '').toLowerCase());
-
-  console.log('NORMALIZED ROLES:', roles);
-
-  return of([...new Set(roles)]);
-}
 
   public getIdentityClaims(): Record<string, any> {
     return this.oauthService.getIdentityClaims() ?? {};
@@ -99,6 +97,7 @@ export class AppAuthService {
     this.accessTokenSubject.next(this._accessToken);
 
     if (!this._accessToken) {
+      this._decodedAccessToken = null;
       return;
     }
 
