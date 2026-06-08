@@ -3,24 +3,37 @@ import {
   ActivatedRouteSnapshot,
   CanActivateChildFn,
   CanActivateFn,
+  GuardResult,
+  MaybeAsync,
   Router,
-  RouterStateSnapshot,
-  UrlTree
+  RouterStateSnapshot
 } from '@angular/router';
 import { map, take } from 'rxjs';
-
 import { OAuthService } from 'angular-oauth2-oidc';
 import { AppAuthService } from '../service/app.auth.service';
 
 export const AppAuthGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
-) => {
+): MaybeAsync<GuardResult> => {
+  return checkAccess(route);
+};
+
+export const AppAuthGuardChild: CanActivateChildFn = (
+  childRoute: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): MaybeAsync<GuardResult> => {
+  return checkAccess(childRoute);
+};
+
+function checkAccess(route: ActivatedRouteSnapshot): MaybeAsync<GuardResult> {
   const authService = inject(AppAuthService);
   const oauthService = inject(OAuthService);
   const router = inject(Router);
 
-  if (!oauthService.hasValidAccessToken()) {
+  const accessToken = oauthService.getAccessToken();
+
+  if (!accessToken || !oauthService.hasValidAccessToken()) {
     return router.parseUrl('/noaccess');
   }
 
@@ -29,6 +42,9 @@ export const AppAuthGuard: CanActivateFn = (
     map((userRoles: string[]) => {
       const hasRoles = checkRoles(route, userRoles);
 
+      console.log('Benutzerrollen normalisiert:', normalizeRoles(userRoles));
+      console.log('Benötigte Rollen normalisiert:', normalizeRoles(route.data['roles'] ?? []));
+
       if (!hasRoles) {
         return router.parseUrl('/noaccess');
       }
@@ -36,7 +52,7 @@ export const AppAuthGuard: CanActivateFn = (
       return true;
     })
   );
-};
+}
 
 function checkRoles(route: ActivatedRouteSnapshot, userRoles: string[]): boolean {
   const requiredRoles = route.data['roles'] as string[] | undefined;
@@ -45,14 +61,16 @@ function checkRoles(route: ActivatedRouteSnapshot, userRoles: string[]): boolean
     return true;
   }
 
-  if (!userRoles || userRoles.length === 0) {
-    return false;
-  }
+  const normalizedUserRoles = normalizeRoles(userRoles);
+  const normalizedRequiredRoles = normalizeRoles(requiredRoles);
 
-  return requiredRoles.some(role => userRoles.includes(role));
+  return normalizedRequiredRoles.some(requiredRole =>
+    normalizedUserRoles.includes(requiredRole)
+  );
 }
 
-export const AppAuthGuardChild: CanActivateChildFn = (
-  route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot
-) => AppAuthGuard(route, state);
+function normalizeRoles(roles: string[]): string[] {
+  return roles
+    .filter(role => typeof role === 'string')
+    .map(role => role.replace(/^ROLE_/i, '').toLowerCase());
+}

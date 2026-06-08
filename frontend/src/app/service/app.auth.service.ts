@@ -44,24 +44,33 @@ export class AppAuthService {
     });
 
     await this.oauthService.loadDiscoveryDocumentAndTryLogin();
-    this.oauthService.setupAutomaticSilentRefresh();
 
+    this.oauthService.setupAutomaticSilentRefresh();
     this.handleEvents(null);
   }
 
-  public getRoles(): Observable<Array<string>> {
-    if (this._decodedAccessToken?.resource_access?.kitcord?.roles) {
-      const roles = this._decodedAccessToken.resource_access.kitcord.roles;
+  public getRoles(): Observable<string[]> {
+  const token = this.oauthService.getAccessToken();
 
-      if (Array.isArray(roles)) {
-        return of(roles.map((role: string) => role.replace('ROLE_', '')));
-      }
-
-      return of([roles.replace('ROLE_', '')]);
-    }
-
+  if (!token) {
     return of([]);
   }
+
+  const decodedToken = this.jwtHelper.decodeToken(token);
+
+  const realmRoles: string[] = decodedToken?.realm_access?.roles ?? [];
+
+  const clientRoles: string[] = Object.values(decodedToken?.resource_access ?? {})
+    .flatMap((client: any) => client?.roles ?? []);
+
+  const roles = [...realmRoles, ...clientRoles]
+    .filter(role => typeof role === 'string')
+    .map(role => role.replace(/^ROLE_/i, '').toLowerCase());
+
+  console.log('NORMALIZED ROLES:', roles);
+
+  return of([...new Set(roles)]);
+}
 
   public getIdentityClaims(): Record<string, any> {
     return this.oauthService.getIdentityClaims() ?? {};
@@ -72,6 +81,8 @@ export class AppAuthService {
     this.useraliasSubject.next('');
     this.usernameSubject.next('');
     this.accessTokenSubject.next('');
+    this._accessToken = '';
+    this._decodedAccessToken = null;
   }
 
   public login(): void {
@@ -95,25 +106,10 @@ export class AppAuthService {
 
     const claims = this.getIdentityClaims();
 
-    const givenName =
-      this._decodedAccessToken?.given_name ??
-      claims['given_name'] ??
-      '';
-
-    const familyName =
-      this._decodedAccessToken?.family_name ??
-      claims['family_name'] ??
-      '';
-
-    const preferredUsername =
-      this._decodedAccessToken?.preferred_username ??
-      claims['preferred_username'] ??
-      '';
-
-    const email =
-      this._decodedAccessToken?.email ??
-      claims['email'] ??
-      '';
+    const givenName = this._decodedAccessToken?.given_name ?? claims['given_name'] ?? '';
+    const familyName = this._decodedAccessToken?.family_name ?? claims['family_name'] ?? '';
+    const preferredUsername = this._decodedAccessToken?.preferred_username ?? claims['preferred_username'] ?? '';
+    const email = this._decodedAccessToken?.email ?? claims['email'] ?? '';
 
     let displayName = '';
 
