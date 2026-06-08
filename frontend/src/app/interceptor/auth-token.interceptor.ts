@@ -1,6 +1,10 @@
+import { inject } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
+import { AppAuthService } from '../service/app.auth.service';
 
 export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
+  const authService = inject(AppAuthService);
+
   const publicUrls = [
     '/users/create',
     '/users/login',
@@ -15,9 +19,7 @@ export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
     return next(request);
   }
 
-  const token =
-    sessionStorage.getItem('access_token') ||
-    sessionStorage.getItem('accessToken');
+  const token = authService.getAccessToken();
 
   if (!token || token === 'null' || token === 'undefined') {
     return next(request);

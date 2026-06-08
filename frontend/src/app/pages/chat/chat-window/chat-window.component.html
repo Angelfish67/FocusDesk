@@ -21,7 +21,7 @@
     [loading]="loadingMessages">
   </app-message-list>
 
-  <div class="message-input">
+  <div *appHasRole="['update', 'admin']" class="message-input">
     <input
       type="text"
       placeholder="Nachricht schreiben..."

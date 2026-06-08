@@ -56,6 +56,10 @@ export class ChatApiService {
     this.selectedChatSubject.next(chat);
   }
 
+  getCurrentUser(): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.apiUrl}/users/me`);
+  }
+
   getChats(): Observable<ChatResponse[]> {
     return this.http.get<ChatResponse[]>(`${this.apiUrl}/chats`);
   }

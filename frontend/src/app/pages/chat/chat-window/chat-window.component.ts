@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { MessageListComponent } from '../message-list/message-list.component';
 import { AppAuthService } from '../../../service/app.auth.service';
+import { HasRoleDirective } from '../../../dir/has-role.diretive';
 import { ChatApiService, ChatResponse, MessageResponse, UserResponse } from '../../../service/chat-api.service';
 
 @Component({
@@ -18,7 +19,8 @@ import { ChatApiService, ChatResponse, MessageResponse, UserResponse } from '../
     FormsModule,
     MatIconModule,
     MatButtonModule,
-    MessageListComponent
+    MessageListComponent,
+    HasRoleDirective
   ],
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.scss']
@@ -35,9 +37,17 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   sendingMessage = false;
   errorMessage = '';
 
+  canSendMessage = false;
+
   private subscriptions = new Subscription();
 
   ngOnInit(): void {
+    this.subscriptions.add(
+      this.appAuthService.hasAnyRole(['update', 'admin']).subscribe(hasRole => {
+        this.canSendMessage = hasRole;
+      })
+    );
+
     this.subscriptions.add(
       this.chatApiService.selectedChat$.subscribe(chat => {
         this.selectedChat = chat;
@@ -74,6 +84,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(): void {
+    if (!this.canSendMessage) {
+      this.errorMessage = 'Du hast keine Berechtigung, Nachrichten zu senden.';
+      return;
+    }
+
     const content = this.messageText.trim();
 
     if (!content || !this.selectedChat || this.sendingMessage) {

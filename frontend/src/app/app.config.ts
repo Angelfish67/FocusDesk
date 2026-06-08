@@ -36,20 +36,24 @@ if (environment.production) {
   enableProdMode();
 }
 
+const frontendBaseUrl = 'http://localhost:4200';
+const keycloakIssuer = 'http://localhost:8080/realms/kitcord';
+
 export const authConfig: AuthConfig = {
-  issuer: 'http://localhost:8080/realms/kitcord',
+  issuer: keycloakIssuer,
   requireHttps: false,
-  redirectUri: environment.frontendBaseUrl,
-  postLogoutRedirectUri: environment.frontendBaseUrl,
+  redirectUri: frontendBaseUrl,
+  postLogoutRedirectUri: frontendBaseUrl,
   clientId: 'kitcord',
   scope: 'openid profile roles offline_access',
   responseType: 'code',
   showDebugInformation: true,
   requestAccessToken: true,
-  silentRefreshRedirectUri: window.location.origin + '/silent-refresh.html',
+  silentRefreshRedirectUri: `${frontendBaseUrl}/silent-refresh.html`,
   silentRefreshTimeout: 500,
   clearHashAfterLogin: true,
-  waitForTokenInMsec: 1000
+  waitForTokenInMsec: 1000,
+  strictDiscoveryDocumentValidation: false
 };
 
 export function storageFactory(): OAuthStorage {

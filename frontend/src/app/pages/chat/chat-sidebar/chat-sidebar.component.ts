@@ -45,9 +45,17 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   chatType: ChatType = 'GROUP';
   userIdsInput = '';
 
+  canCreateChat = false;
+
   private subscriptions = new Subscription();
 
   ngOnInit(): void {
+    this.subscriptions.add(
+      this.appAuthService.hasAnyRole(['update', 'admin']).subscribe(hasRole => {
+        this.canCreateChat = hasRole;
+      })
+    );
+
     this.loadChats();
 
     this.subscriptions.add(
@@ -94,22 +102,37 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   }
 
   toggleCreateChat(): void {
+    if (!this.canCreateChat) {
+      this.errorMessage = 'Du hast keine Berechtigung, Chats zu erstellen.';
+      return;
+    }
+
     this.showCreateChat = !this.showCreateChat;
     this.errorMessage = '';
   }
 
   createChat(): void {
-    this.errorMessage = '';
+    if (!this.canCreateChat) {
+      this.errorMessage = 'Du hast keine Berechtigung, Chats zu erstellen.';
+      return;
+    }
 
-    const userIds = this.parseUserIds(this.userIdsInput);
+    this.errorMessage = '';
 
     if (!this.chatName.trim()) {
       this.errorMessage = 'Bitte gib einen Chatnamen ein.';
       return;
     }
 
+    const userIds = this.parseUserIds(this.userIdsInput);
+
     if (userIds.length === 0) {
       this.errorMessage = 'Bitte gib mindestens eine User-ID ein.';
+      return;
+    }
+
+    if (this.chatType === 'GROUP' && userIds.length < 2) {
+      this.errorMessage = 'Ein Gruppenchat braucht mindestens 2 User-IDs.';
       return;
     }
 
@@ -150,10 +173,14 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   }
 
   private parseUserIds(value: string): number[] {
-    return value
-      .split(',')
-      .map(id => Number(id.trim()))
-      .filter(id => Number.isInteger(id) && id > 0);
+    return Array.from(
+      new Set(
+        value
+          .split(',')
+          .map(id => Number(id.trim()))
+          .filter(id => Number.isInteger(id) && id > 0)
+      )
+    );
   }
 
   private isCurrentUserInChat(
@@ -174,11 +201,9 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     const claims = this.appAuthService.getIdentityClaims?.() ?? {};
 
     return [
-      token?.sub,
       token?.preferred_username,
       token?.name,
       token?.email,
-      claims['sub'],
       claims['preferred_username'],
       claims['name'],
       claims['email']
@@ -194,9 +219,9 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     currentUserValues: string[]
   ): boolean {
     const userValues = [
-      user.keycloakId,
       user.username,
-      user.email
+      user.email,
+      user.keycloakId
     ]
       .filter((value): value is string =>
         typeof value === 'string' && value.trim().length > 0
