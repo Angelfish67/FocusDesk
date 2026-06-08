@@ -10,15 +10,15 @@ export class AppAuthService {
   private oauthService = inject(OAuthService);
   private authConfig = inject(AuthConfig);
 
-  private jwtHelper: JwtHelperService = new JwtHelperService();
+  private jwtHelper = new JwtHelperService();
 
-  private usernameSubject: BehaviorSubject<string> = new BehaviorSubject('');
+  private usernameSubject = new BehaviorSubject<string>('');
   public readonly usernameObservable: Observable<string> = this.usernameSubject.asObservable();
 
-  private useraliasSubject: BehaviorSubject<string> = new BehaviorSubject('');
+  private useraliasSubject = new BehaviorSubject<string>('');
   public readonly useraliasObservable: Observable<string> = this.useraliasSubject.asObservable();
 
-  private accessTokenSubject: BehaviorSubject<string> = new BehaviorSubject('');
+  private accessTokenSubject = new BehaviorSubject<string>('');
   public readonly accessTokenObservable: Observable<string> = this.accessTokenSubject.asObservable();
 
   private _decodedAccessToken: any = null;
@@ -33,7 +33,7 @@ export class AppAuthService {
   }
 
   get accessToken(): string {
-    return this._accessToken;
+    return this.getAccessToken();
   }
 
   async initAuth(): Promise<void> {
@@ -44,15 +44,34 @@ export class AppAuthService {
     });
 
     await this.oauthService.loadDiscoveryDocumentAndTryLogin();
-
     this.oauthService.setupAutomaticSilentRefresh();
+
     this.handleEvents(null);
   }
 
-  public getRoles(): Observable<string[]> {
-    const token = this.oauthService.getAccessToken();
+  public getAccessToken(): string {
+    return (
+      this.oauthService.getAccessToken() ||
+      sessionStorage.getItem('access_token') ||
+      sessionStorage.getItem('accessToken') ||
+      ''
+    );
+  }
 
-    if (!token) {
+  public hasValidAccessToken(): boolean {
+    const token = this.getAccessToken();
+
+    if (!token || token === 'null' || token === 'undefined') {
+      return false;
+    }
+
+    return !this.jwtHelper.isTokenExpired(token);
+  }
+
+  public getRoles(): Observable<string[]> {
+    const token = this.getAccessToken();
+
+    if (!token || this.jwtHelper.isTokenExpired(token)) {
       return of([]);
     }
 
@@ -65,26 +84,47 @@ export class AppAuthService {
 
     const roles = [...realmRoles, ...resourceRoles]
       .filter(role => typeof role === 'string')
-      .map(role => role.replace(/^ROLE_/i, '').toLowerCase());
+      .map(role => this.normalizeRole(role));
 
     return of([...new Set(roles)]);
+  }
+
+  public hasAnyRole(requiredRoles: string[]): Observable<boolean> {
+    const normalizedRequiredRoles = requiredRoles.map(role => this.normalizeRole(role));
+
+    return new Observable<boolean>(subscriber => {
+      this.getRoles().subscribe(userRoles => {
+        const hasRole = normalizedRequiredRoles.some(requiredRole =>
+          userRoles.includes(requiredRole)
+        );
+
+        subscriber.next(hasRole);
+        subscriber.complete();
+      });
+    });
   }
 
   public getIdentityClaims(): Record<string, any> {
     return this.oauthService.getIdentityClaims() ?? {};
   }
 
+  public login(): void {
+    this.oauthService.initLoginFlow();
+  }
+
   public logout(): void {
     this.oauthService.logOut();
+
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('refresh_token');
+
     this.useraliasSubject.next('');
     this.usernameSubject.next('');
     this.accessTokenSubject.next('');
+
     this._accessToken = '';
     this._decodedAccessToken = null;
-  }
-
-  public login(): void {
-    this.oauthService.initLoginFlow();
   }
 
   private handleEvents(event: any): void {
@@ -93,7 +133,7 @@ export class AppAuthService {
       return;
     }
 
-    this._accessToken = this.oauthService.getAccessToken();
+    this._accessToken = this.getAccessToken();
     this.accessTokenSubject.next(this._accessToken);
 
     if (!this._accessToken) {
@@ -107,7 +147,8 @@ export class AppAuthService {
 
     const givenName = this._decodedAccessToken?.given_name ?? claims['given_name'] ?? '';
     const familyName = this._decodedAccessToken?.family_name ?? claims['family_name'] ?? '';
-    const preferredUsername = this._decodedAccessToken?.preferred_username ?? claims['preferred_username'] ?? '';
+    const preferredUsername =
+      this._decodedAccessToken?.preferred_username ?? claims['preferred_username'] ?? '';
     const email = this._decodedAccessToken?.email ?? claims['email'] ?? '';
 
     let displayName = '';
@@ -129,5 +170,12 @@ export class AppAuthService {
     if (preferredUsername) {
       this.useraliasSubject.next(preferredUsername);
     }
+  }
+
+  private normalizeRole(role: string): string {
+    return role
+      .replace(/^ROLE_/i, '')
+      .replace(/^role_/i, '')
+      .toLowerCase();
   }
 }

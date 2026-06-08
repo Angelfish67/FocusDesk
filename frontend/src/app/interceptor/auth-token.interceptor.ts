@@ -5,7 +5,8 @@ export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
     '/users/create',
     '/users/login',
     '/assets/',
-    '/realms/'
+    '/realms/',
+    '/protocol/openid-connect/token'
   ];
 
   const isPublicUrl = publicUrls.some(url => request.url.includes(url));
@@ -16,10 +17,7 @@ export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
 
   const token =
     sessionStorage.getItem('access_token') ||
-    sessionStorage.getItem('accessToken') ||
-    sessionStorage.getItem('access_token') ||
-    sessionStorage.getItem('accessToken') ||
-    sessionStorage.getItem('access_token_stored_at');
+    sessionStorage.getItem('accessToken');
 
   if (!token || token === 'null' || token === 'undefined') {
     return next(request);
