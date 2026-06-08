@@ -1,45 +1,151 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
+import { AdminApiService } from '../../service/admin-api.service';
 import {
   ChatResponse,
   MessageResponse,
   UserResponse
-} from './chat-api.service';
+} from '../../service/chat-api.service';
 
-@Injectable({
-  providedIn: 'root'
+type AdminTab = 'users' | 'chats' | 'messages';
+
+@Component({
+  selector: 'app-admin-console',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterLink,
+    MatButtonModule,
+    MatIconModule
+  ],
+  templateUrl: './admin-console.component.html',
+  styleUrls: ['./admin-console.component.scss']
 })
-export class AdminApiService {
-  private http = inject(HttpClient);
-  private apiUrl = environment.backendBaseUrl;
+export class AdminConsoleComponent implements OnInit {
+  private adminApiService = inject(AdminApiService);
 
-  health(): Observable<string> {
-    return this.http.get(`${this.apiUrl}/admin/health`, {
-      responseType: 'text'
+  activeTab: AdminTab = 'users';
+
+  dashboardMessage = '';
+  healthMessage = '';
+
+  users: UserResponse[] = [];
+  chats: ChatResponse[] = [];
+  messages: MessageResponse[] = [];
+
+  loading = false;
+  errorMessage = '';
+  successMessage = '';
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.adminApiService.health().subscribe({
+      next: value => this.healthMessage = value,
+      error: error => {
+        console.error(error);
+        this.errorMessage = 'Du hast keinen Zugriff auf die Admin-Konsole.';
+        this.loading = false;
+      }
+    });
+
+    this.adminApiService.dashboard().subscribe({
+      next: value => this.dashboardMessage = value,
+      error: error => console.error(error)
+    });
+
+    this.loadUsers();
+    this.loadChats();
+    this.loadMessages();
+  }
+
+  loadUsers(): void {
+    this.adminApiService.getUsers().subscribe({
+      next: users => {
+        this.users = users ?? [];
+        this.loading = false;
+      },
+      error: error => {
+        console.error(error);
+        this.errorMessage = 'Benutzer konnten nicht geladen werden.';
+        this.loading = false;
+      }
     });
   }
 
-  dashboard(): Observable<string> {
-    return this.http.get(`${this.apiUrl}/admin/dashboard`, {
-      responseType: 'text'
+  loadChats(): void {
+    this.adminApiService.getChats().subscribe({
+      next: chats => this.chats = chats ?? [],
+      error: error => console.error(error)
     });
   }
 
-  getUsers(): Observable<UserResponse[]> {
-    return this.http.get<UserResponse[]>(`${this.apiUrl}/admin/users`);
+  loadMessages(): void {
+    this.adminApiService.getMessages().subscribe({
+      next: messages => this.messages = messages ?? [],
+      error: error => console.error(error)
+    });
   }
 
-  getChats(): Observable<ChatResponse[]> {
-    return this.http.get<ChatResponse[]>(`${this.apiUrl}/admin/chats`);
+  setTab(tab: AdminTab): void {
+    this.activeTab = tab;
+    this.errorMessage = '';
+    this.successMessage = '';
   }
 
-  getMessages(): Observable<MessageResponse[]> {
-    return this.http.get<MessageResponse[]>(`${this.apiUrl}/admin/messages`);
+  deleteUser(user: UserResponse): void {
+    if (!user.id) {
+      return;
+    }
+
+    const confirmed = confirm(`Benutzer "${user.username}" wirklich löschen?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.adminApiService.deleteUser(user.id).subscribe({
+      next: () => {
+        this.users = this.users.filter(existingUser => existingUser.id !== user.id);
+        this.successMessage = 'Benutzer wurde gelöscht.';
+        this.loading = false;
+        this.loadChats();
+        this.loadMessages();
+      },
+      error: error => {
+        console.error(error);
+        this.errorMessage = 'Benutzer konnte nicht gelöscht werden.';
+        this.loading = false;
+      }
+    });
   }
 
-  deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/admin/users/${id}`);
+  getChatUsers(chat: ChatResponse): string {
+    if (!chat.users || chat.users.length === 0) {
+      return '-';
+    }
+
+    return chat.users
+      .map(user => user.username || user.email || `ID ${user.id}`)
+      .join(', ');
+  }
+
+  getMessageSender(message: MessageResponse): string {
+    return message.sender?.username || message.sender?.email || '-';
   }
 }
