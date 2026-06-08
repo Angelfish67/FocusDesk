@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { HasRoleDirective } from '../../../directive/has-role.directive';
+import { HasRoleDirective } from '../../../dir/has-role.diretive';
 
 import { UserProfileComponent } from '../user-profile/user-profile.component';
 import { ChatApiService, ChatResponse, ChatType } from '../../../service/chat-api.service';
