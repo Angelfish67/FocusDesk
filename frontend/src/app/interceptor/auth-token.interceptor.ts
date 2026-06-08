@@ -15,8 +15,8 @@ export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   const token =
-    localStorage.getItem('access_token') ||
-    localStorage.getItem('accessToken') ||
+    sessionStorage.getItem('access_token') ||
+    sessionStorage.getItem('accessToken') ||
     sessionStorage.getItem('access_token') ||
     sessionStorage.getItem('accessToken') ||
     sessionStorage.getItem('access_token_stored_at');

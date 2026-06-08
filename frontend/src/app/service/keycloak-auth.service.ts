@@ -34,20 +34,20 @@ export class KeycloakAuthService {
       })
     }).pipe(
       tap(response => {
-        localStorage.setItem('access_token', response.access_token);
-        localStorage.setItem('refresh_token', response.refresh_token);
+        sessionStorage.setItem('access_token', response.access_token);
+        sessionStorage.setItem('refresh_token', response.refresh_token);
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
     this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return sessionStorage.getItem('access_token');
   }
 
   isLoggedIn(): boolean {

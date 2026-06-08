@@ -23,13 +23,13 @@ export class UserProfileComponent implements OnInit {
   }
 
   logout(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
     this.router.navigate(['/login']);
   }
 
   private loadUserFromToken(): void {
-    const token = localStorage.getItem('access_token');
+    const token = sessionStorage.getItem('access_token');
 
     if (!token) {
       return;

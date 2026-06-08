@@ -10,15 +10,15 @@ export class AppAuthService {
   private oauthService = inject(OAuthService);
   private authConfig = inject(AuthConfig);
 
-  private jwtHelper = new JwtHelperService();
+  private jwtHelper: JwtHelperService = new JwtHelperService();
 
-  private usernameSubject = new BehaviorSubject<string>('');
+  private usernameSubject: BehaviorSubject<string> = new BehaviorSubject('');
   public readonly usernameObservable: Observable<string> = this.usernameSubject.asObservable();
 
-  private useraliasSubject = new BehaviorSubject<string>('');
+  private useraliasSubject: BehaviorSubject<string> = new BehaviorSubject('');
   public readonly useraliasObservable: Observable<string> = this.useraliasSubject.asObservable();
 
-  private accessTokenSubject = new BehaviorSubject<string>('');
+  private accessTokenSubject: BehaviorSubject<string> = new BehaviorSubject('');
   public readonly accessTokenObservable: Observable<string> = this.accessTokenSubject.asObservable();
 
   private _decodedAccessToken: any = null;
@@ -56,11 +56,11 @@ export class AppAuthService {
       return of([]);
     }
 
-    const decoded = this.jwtHelper.decodeToken(token);
+    const decodedToken = this.jwtHelper.decodeToken(token);
 
-    const realmRoles: string[] = decoded?.realm_access?.roles ?? [];
+    const realmRoles: string[] = decodedToken?.realm_access?.roles ?? [];
 
-    const resourceRoles: string[] = Object.values(decoded?.resource_access ?? {})
+    const resourceRoles: string[] = Object.values(decodedToken?.resource_access ?? {})
       .flatMap((client: any) => client?.roles ?? []);
 
     const roles = [...realmRoles, ...resourceRoles]

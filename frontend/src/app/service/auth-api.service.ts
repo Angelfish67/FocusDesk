@@ -42,26 +42,26 @@ export class AuthApiService {
         const refreshToken = response.refreshToken ?? response.refresh_token;
 
         if (accessToken) {
-          localStorage.setItem('access_token', accessToken);
+          sessionStorage.setItem('access_token', accessToken);
         }
 
         if (refreshToken) {
-          localStorage.setItem('refresh_token', refreshToken);
+          sessionStorage.setItem('refresh_token', refreshToken);
         }
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('access_token');
+    return !!sessionStorage.getItem('access_token');
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem('access_token');
+    return sessionStorage.getItem('access_token');
   }
 }
