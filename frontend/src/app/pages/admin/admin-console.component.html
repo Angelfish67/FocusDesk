@@ -1,0 +1,186 @@
+<section class="admin-page">
+  <header class="admin-header">
+    <div>
+      <p class="eyebrow">Kitcord Admin</p>
+      <h1>Admin-Konsole</h1>
+      <p class="subtitle">{{ dashboardMessage || 'Adminbereich wird geladen ...' }}</p>
+    </div>
+
+    <a routerLink="/chat" mat-stroked-button>
+      <mat-icon>arrow_back</mat-icon>
+      Zurück zum Chat
+    </a>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="alert success">
+      {{ successMessage }}
+    </div>
+  }
+
+  <div class="stats-grid">
+    <article class="stat-card">
+      <span>Benutzer</span>
+      <strong>{{ users.length }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span>Chats</span>
+      <strong>{{ chats.length }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span>Nachrichten</span>
+      <strong>{{ messages.length }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span>Status</span>
+      <strong>{{ healthMessage || '-' }}</strong>
+    </article>
+  </div>
+
+  <nav class="tabs">
+    <button
+      type="button"
+      [class.active]="activeTab === 'users'"
+      (click)="setTab('users')"
+    >
+      Benutzer
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'chats'"
+      (click)="setTab('chats')"
+    >
+      Chats
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'messages'"
+      (click)="setTab('messages')"
+    >
+      Nachrichten
+    </button>
+  </nav>
+
+  <main class="panel">
+    @if (loading) {
+      <p class="loading">Lade Admin-Daten ...</p>
+    }
+
+    @if (!loading && activeTab === 'users') {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Benutzername</th>
+              <th>E-Mail</th>
+              <th>Vorname</th>
+              <th>Nachname</th>
+              <th>Aktion</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (user of users; track user.id) {
+              <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username || '-' }}</td>
+                <td>{{ user.email || '-' }}</td>
+                <td>{{ user.firstName || '-' }}</td>
+                <td>{{ user.lastName || '-' }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="danger-button"
+                    (click)="deleteUser(user)"
+                  >
+                    Löschen
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="empty">Keine Benutzer gefunden.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!loading && activeTab === 'chats') {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Typ</th>
+              <th>Erstellt am</th>
+              <th>Benutzer</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (chat of chats; track chat.id) {
+              <tr>
+                <td>{{ chat.id }}</td>
+                <td>{{ chat.name || '-' }}</td>
+                <td>{{ chat.chatType || '-' }}</td>
+                <td>{{ chat.createdAt || '-' }}</td>
+                <td>{{ getChatUsers(chat) }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty">Keine Chats gefunden.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!loading && activeTab === 'messages') {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Sender</th>
+              <th>Nachricht</th>
+              <th>Gesendet am</th>
+              <th>Bearbeitet am</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (message of messages; track message.id) {
+              <tr>
+                <td>{{ message.id }}</td>
+                <td>{{ getMessageSender(message) }}</td>
+                <td class="message-content">{{ message.content || '-' }}</td>
+                <td>{{ message.sentAt || '-' }}</td>
+                <td>{{ message.editedAt || '-' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty">Keine Nachrichten gefunden.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </main>
+</section>
