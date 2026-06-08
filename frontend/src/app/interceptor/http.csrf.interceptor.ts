@@ -1,13 +1,13 @@
-import { HttpInterceptorFn, HttpXsrfTokenExtractor } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { HttpInterceptorFn, HttpXsrfTokenExtractor } from '@angular/common/http';
 
 export const httpCsrfInterceptor: HttpInterceptorFn = (request, next) => {
   const tokenExtractor = inject(HttpXsrfTokenExtractor);
 
   const unsafeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
-  const shouldAddToken = unsafeMethods.includes(request.method.toUpperCase());
+  const isUnsafeMethod = unsafeMethods.includes(request.method.toUpperCase());
 
-  if (!shouldAddToken) {
+  if (!isUnsafeMethod) {
     return next(request);
   }
 
