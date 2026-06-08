@@ -7,7 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { HasRoleDirective } from '../../../dir/has-role.diretive';
 
 import { UserProfileComponent } from '../user-profile/user-profile.component';
-import { ChatApiService, ChatResponse, ChatType } from '../../../service/chat-api.service';
+import { AppAuthService } from '../../../service/app.auth.service';
+import { ChatApiService, ChatResponse, ChatType, UserResponse } from '../../../service/chat-api.service';
 
 @Component({
   selector: 'app-chat-sidebar',
@@ -25,6 +26,7 @@ import { ChatApiService, ChatResponse, ChatType } from '../../../service/chat-ap
 })
 export class ChatSidebarComponent implements OnInit {
   private chatApiService = inject(ChatApiService);
+  private appAuthService = inject(AppAuthService);
 
   chats: ChatResponse[] = [];
   selectedChat: ChatResponse | null = null;
@@ -51,11 +53,15 @@ export class ChatSidebarComponent implements OnInit {
 
     this.chatApiService.getChats().subscribe({
       next: chats => {
-        this.chats = chats;
+        const ownChats = (chats ?? []).filter(chat => this.isCurrentUserInChat(chat));
+
+        this.chats = ownChats;
         this.loading = false;
 
-        if (chats.length > 0) {
-          this.selectChat(chats[0]);
+        if (ownChats.length > 0) {
+          this.selectChat(ownChats[0]);
+        } else {
+          this.chatApiService.selectChat(null);
         }
       },
       error: error => {
@@ -103,13 +109,16 @@ export class ChatSidebarComponent implements OnInit {
       userIds
     }).subscribe({
       next: createdChat => {
-        this.chats = [createdChat, ...this.chats];
+        if (this.isCurrentUserInChat(createdChat)) {
+          this.chats = [createdChat, ...this.chats];
+          this.selectChat(createdChat);
+        }
+
         this.chatName = '';
         this.userIdsInput = '';
         this.chatType = 'GROUP';
         this.showCreateChat = false;
         this.loading = false;
-        this.selectChat(createdChat);
       },
       error: error => {
         console.error('Chat konnte nicht erstellt werden:', error);
@@ -126,5 +135,48 @@ export class ChatSidebarComponent implements OnInit {
       .split(',')
       .map(id => Number(id.trim()))
       .filter(id => !Number.isNaN(id) && id > 0);
+  }
+
+  private isCurrentUserInChat(chat: ChatResponse): boolean {
+    const currentUserValues = this.getCurrentUserValues();
+
+    if (currentUserValues.length === 0) {
+      return false;
+    }
+
+    return chat.users?.some(user => this.userMatchesCurrentUser(user, currentUserValues)) ?? false;
+  }
+
+  private getCurrentUserValues(): string[] {
+    const token = this.appAuthService.decodedAccessToken ?? {};
+    const claims = this.appAuthService.getIdentityClaims?.() ?? {};
+
+    return [
+      token?.sub,
+      token?.preferred_username,
+      token?.name,
+      token?.email,
+      claims['sub'],
+      claims['preferred_username'],
+      claims['name'],
+      claims['email']
+    ]
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .map(value => value.trim().toLowerCase());
+  }
+
+  private userMatchesCurrentUser(user: UserResponse, currentUserValues: string[]): boolean {
+    const userValues = [
+      user.keycloakId,
+      user.username,
+      user.email,
+      user.firstName,
+      user.lastName,
+      `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
+    ]
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .map(value => value.trim().toLowerCase());
+
+    return userValues.some(userValue => currentUserValues.includes(userValue));
   }
 }
