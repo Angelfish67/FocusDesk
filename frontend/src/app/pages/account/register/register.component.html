@@ -3,57 +3,12 @@
     <img src="assets/images/logo.png" alt="Kitcord Logo" class="auth-logo">
 
     <h1>Konto erstellen</h1>
-    <p>Registriere dich und starte mit Kitcord.</p>
+    <p>Registriere dich direkt über Keycloak.</p>
 
-    <form class="auth-form" (ngSubmit)="register()">
-      <mat-form-field appearance="outline">
-        <mat-label>Benutzername</mat-label>
-        <input matInput name="username" type="text" [(ngModel)]="username" placeholder="Benutzername">
-        <mat-icon matSuffix>person</mat-icon>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Vorname</mat-label>
-        <input matInput name="firstName" type="text" [(ngModel)]="firstName" placeholder="Vorname">
-        <mat-icon matSuffix>badge</mat-icon>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Nachname</mat-label>
-        <input matInput name="lastName" type="text" [(ngModel)]="lastName" placeholder="Nachname">
-        <mat-icon matSuffix>badge</mat-icon>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>E-Mail</mat-label>
-        <input matInput name="email" type="email" [(ngModel)]="email" placeholder="name@example.com">
-        <mat-icon matSuffix>mail</mat-icon>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Passwort</mat-label>
-        <input matInput name="password" type="password" [(ngModel)]="password" placeholder="Mindestens 8 Zeichen">
-        <mat-icon matSuffix>lock</mat-icon>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Passwort bestätigen</mat-label>
-        <input matInput name="confirmPassword" type="password" [(ngModel)]="confirmPassword" placeholder="Passwort wiederholen">
-        <mat-icon matSuffix>verified_user</mat-icon>
-      </mat-form-field>
-
-      @if (errorMessage) {
-        <p class="auth-error">{{ errorMessage }}</p>
-      }
-
-      @if (successMessage) {
-        <p class="auth-success">{{ successMessage }}</p>
-      }
-
-      <button class="auth-submit" color="primary" mat-flat-button type="submit" [disabled]="loading">
-        {{ loading ? 'Wird erstellt...' : 'Registrieren' }}
-      </button>
-    </form>
+    <button class="auth-submit" color="primary" mat-flat-button type="button" (click)="register()">
+      <mat-icon>person_add</mat-icon>
+      Mit Keycloak registrieren
+    </button>
 
     <p class="auth-switch">
       Bereits ein Konto?

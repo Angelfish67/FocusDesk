@@ -3,47 +3,18 @@
     <img src="assets/images/logo.png" alt="Kitcord Logo" class="auth-logo">
 
     <h1>Willkommen zurück</h1>
-    <p>Melde dich an und öffne deine Chats.</p>
+    <p>Melde dich direkt über Keycloak an.</p>
 
-    <form class="auth-form" (ngSubmit)="login()">
-      <mat-form-field appearance="outline">
-        <mat-label>E-Mail</mat-label>
-        <input
-          matInput
-          name="email"
-          type="email"
-          [(ngModel)]="email"
-          placeholder="name@example.com"
-        >
-        <mat-icon matSuffix>mail</mat-icon>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Passwort</mat-label>
-        <input
-          matInput
-          name="password"
-          type="password"
-          [(ngModel)]="password"
-          placeholder="Passwort"
-        >
-        <mat-icon matSuffix>lock</mat-icon>
-      </mat-form-field>
-
-      @if (errorMessage) {
-        <p class="auth-error">{{ errorMessage }}</p>
-      }
-
-      <button
-        class="auth-submit"
-        color="primary"
-        mat-flat-button
-        type="submit"
-        [disabled]="loading"
-      >
-        {{ loading ? 'Wird angemeldet...' : 'Login' }}
-      </button>
-    </form>
+    <button
+      class="auth-submit"
+      color="primary"
+      mat-flat-button
+      type="button"
+      (click)="login()"
+    >
+      <mat-icon>login</mat-icon>
+      Mit Keycloak anmelden
+    </button>
 
     <p class="auth-switch">
       Noch kein Konto?

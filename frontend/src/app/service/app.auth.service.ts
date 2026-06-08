@@ -24,9 +24,8 @@ export class AppAuthService {
   private _decodedAccessToken: any = null;
   private _accessToken = '';
 
-  constructor() {
-    this.handleEvents(null);
-  }
+  private initialized = false;
+  private initPromise: Promise<void> | null = null;
 
   get decodedAccessToken(): any {
     return this._decodedAccessToken;
@@ -37,6 +36,19 @@ export class AppAuthService {
   }
 
   async initAuth(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    this.initPromise = this.doInitAuth();
+    return this.initPromise;
+  }
+
+  private async doInitAuth(): Promise<void> {
     this.oauthService.configure(this.authConfig);
 
     this.oauthService.events.subscribe(event => {
@@ -44,8 +56,10 @@ export class AppAuthService {
     });
 
     await this.oauthService.loadDiscoveryDocumentAndTryLogin();
+
     this.oauthService.setupAutomaticSilentRefresh();
 
+    this.initialized = true;
     this.handleEvents(null);
   }
 
@@ -108,9 +122,21 @@ export class AppAuthService {
     return this.oauthService.getIdentityClaims() ?? {};
   }
 
-  public login(): void {
-    this.oauthService.initLoginFlow();
+  public async login(): Promise<void> {
+    await this.initAuth();
+    this.oauthService.initCodeFlow();
   }
+
+ public register(): void {
+  const registerUrl =
+    'http://localhost:8080/realms/kitcord/protocol/openid-connect/registrations' +
+    '?client_id=kitcord' +
+    '&response_type=code' +
+    '&scope=openid%20profile%20roles%20offline_access' +
+    '&redirect_uri=' + encodeURIComponent('http://localhost:4200');
+
+  window.location.href = registerUrl;
+}
 
   public logout(): void {
     this.oauthService.logOut();
@@ -125,6 +151,8 @@ export class AppAuthService {
 
     this._accessToken = '';
     this._decodedAccessToken = null;
+    this.initialized = false;
+    this.initPromise = null;
   }
 
   private handleEvents(event: any): void {
