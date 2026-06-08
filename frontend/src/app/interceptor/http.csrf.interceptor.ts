@@ -1,21 +1,27 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpXsrfTokenExtractor } from '@angular/common/http';
-import {Observable} from 'rxjs';
+import { HttpInterceptorFn, HttpXsrfTokenExtractor } from '@angular/common/http';
+import { inject } from '@angular/core';
 
-@Injectable()
-export class HttpXSRFInterceptor implements HttpInterceptor {
-  private tokenExtractor = inject(HttpXsrfTokenExtractor);
+export const httpCsrfInterceptor: HttpInterceptorFn = (request, next) => {
+  const tokenExtractor = inject(HttpXsrfTokenExtractor);
 
+  const unsafeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+  const shouldAddToken = unsafeMethods.includes(request.method.toUpperCase());
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (!req.url.startsWith('http://localhost:8080')) {
-      const headerName = 'X-XSRF-TOKEN';
-      const token = this.tokenExtractor.getToken() as string;
-      if (token !== null && !req.headers.has(headerName)) {
-        req = req.clone({headers: req.headers.set(headerName, token)});
-      }
-    }
-
-    return next.handle(req);
+  if (!shouldAddToken) {
+    return next(request);
   }
-}
+
+  const token = tokenExtractor.getToken();
+
+  if (!token || request.headers.has('X-XSRF-TOKEN')) {
+    return next(request);
+  }
+
+  const csrfRequest = request.clone({
+    setHeaders: {
+      'X-XSRF-TOKEN': token
+    }
+  });
+
+  return next(csrfRequest);
+};

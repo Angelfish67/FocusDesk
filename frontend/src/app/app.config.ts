@@ -1,7 +1,8 @@
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 import {
   provideHttpClient,
-  withInterceptors
+  withInterceptors,
+  withXsrfConfiguration
 } from '@angular/common/http';
 import {
   ApplicationConfig,
@@ -13,24 +14,21 @@ import {
   provideZoneChangeDetection
 } from '@angular/core';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
-
-import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
-
+import { provideTranslateService } from '@ngx-translate/core';
 import {
   AuthConfig,
   OAuthStorage,
   provideOAuthClient
 } from 'angular-oauth2-oidc';
 
-import { MatPaginatorIntl } from '@angular/material/paginator';
-
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
-
 import { authTokenInterceptor } from './interceptor/auth-token.interceptor';
+import { httpCsrfInterceptor } from './interceptor/http.csrf.interceptor';
 import { AppAuthService } from './service/app.auth.service';
 import { MatPaginatorI18nService } from './service/mat.intl.service';
 
@@ -74,17 +72,14 @@ export const appConfig: ApplicationConfig = {
       provide: MatPaginatorIntl,
       useClass: MatPaginatorI18nService
     },
-
     {
       provide: AuthConfig,
       useValue: authConfig
     },
-
     {
       provide: OAuthStorage,
       useFactory: storageFactory
     },
-
     {
       provide: LocationStrategy,
       useClass: PathLocationStrategy
@@ -100,7 +95,12 @@ export const appConfig: ApplicationConfig = {
     }),
 
     provideHttpClient(
+      withXsrfConfiguration({
+        cookieName: 'XSRF-TOKEN',
+        headerName: 'X-XSRF-TOKEN'
+      }),
       withInterceptors([
+        httpCsrfInterceptor,
         authTokenInterceptor
       ])
     ),
