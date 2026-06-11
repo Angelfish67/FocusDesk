@@ -11,7 +11,7 @@
       <h4>Chats</h4>
 
       <button
-        *appHasRole="['update', 'admin']"
+        *appHasRole="['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']"
         class="create-button"
         type="button"
         (click)="toggleCreateChat()"
@@ -21,12 +21,14 @@
     </div>
 
     @if (showCreateChat) {
-      <div *appHasRole="['update', 'admin']" class="create-chat-box">
+      <div *appHasRole="['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']" class="create-chat-box">
 
         <input
           type="text"
           placeholder="Chatname"
           [(ngModel)]="chatName"
+          [minLength]="minChatNameLength"
+          [maxLength]="maxChatNameLength"
         >
 
         <select [(ngModel)]="chatType">
@@ -38,6 +40,7 @@
           type="text"
           placeholder="User-IDs, z.B. 1, 2, 3"
           [(ngModel)]="userIdsInput"
+          [maxLength]="maxUserIdsLength"
         >
 
         @if (errorMessage) {
@@ -63,6 +66,7 @@
     @for (chat of chats; track chat.id) {
       <button
         class="chat-item"
+        type="button"
         [class.active]="selectedChat?.id === chat.id"
         (click)="selectChat(chat)"
       >

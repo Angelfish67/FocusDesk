@@ -41,6 +41,8 @@
         type="text"
         placeholder="Nachricht schreiben..."
         [(ngModel)]="messageText"
+        [minLength]="minMessageLength"
+        [maxLength]="maxMessageLength"
         [disabled]="!selectedChat || sendingMessage"
         (keydown.enter)="sendMessage()"
       >
@@ -49,7 +51,7 @@
         mat-icon-button
         color="primary"
         type="button"
-        [disabled]="!selectedChat || !messageText.trim() || sendingMessage"
+        [disabled]="!selectedChat || !messageText.trim() || sendingMessage || messageText.trim().length > maxMessageLength"
         (click)="sendMessage()"
       >
         <mat-icon>send</mat-icon>

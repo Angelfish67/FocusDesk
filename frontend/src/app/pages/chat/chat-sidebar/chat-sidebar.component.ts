@@ -16,8 +16,6 @@ import {
   UserResponse
 } from '../../../service/chat-api.service';
 
-// selektor
-
 @Component({
   selector: 'app-chat-sidebar',
   standalone: true,
@@ -49,11 +47,15 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
 
   canCreateChat = false;
 
+  readonly minChatNameLength = 3;
+  readonly maxChatNameLength = 40;
+  readonly maxUserIdsLength = 100;
+
   private subscriptions = new Subscription();
 
   ngOnInit(): void {
     this.subscriptions.add(
-      this.appAuthService.hasAnyRole(['update', 'admin']).subscribe(hasRole => {
+      this.appAuthService.hasAnyRole(['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']).subscribe(hasRole => {
         this.canCreateChat = hasRole;
       })
     );
@@ -61,14 +63,12 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     this.loadChats();
 
     this.subscriptions.add(
-      // wartet auf antwort, subscribe (observable)
-      this.chatApiService.selectedChat$.subscribe(chat => { // observer
+      this.chatApiService.selectedChat$.subscribe(chat => {
         this.selectedChat = chat;
       })
     );
   }
 
-  // lifecycle hook, zerstört wenn user bspw seite ändert
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
@@ -123,32 +123,20 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
 
     this.errorMessage = '';
 
-    if (!this.chatName.trim()) {
-      this.errorMessage = 'Bitte gib einen Chatnamen ein.';
-      return;
-    }
-
+    const name = this.chatName.trim();
     const userIds = this.parseUserIds(this.userIdsInput);
 
-    if (userIds.length === 0) {
-      this.errorMessage = 'Bitte gib mindestens eine User-ID ein.';
-      return;
-    }
+    const validationError = this.validateChatInput(name, this.chatType, userIds);
 
-    if (this.chatType === 'GROUP' && userIds.length < 2) {
-      this.errorMessage = 'Ein Gruppenchat braucht mindestens 2 User-IDs.';
-      return;
-    }
-
-    if (this.chatType === 'DIRECT' && userIds.length !== 2) {
-      this.errorMessage = 'Ein Direktchat braucht genau 2 User-IDs.';
+    if (validationError) {
+      this.errorMessage = validationError;
       return;
     }
 
     this.loading = true;
 
     this.chatApiService.createChat({
-      name: this.chatName.trim(),
+      name,
       chatType: this.chatType,
       userIds
     }).subscribe({
@@ -174,6 +162,54 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
         this.loading = false;
       }
     });
+  }
+
+  private validateChatInput(name: string, chatType: ChatType, userIds: number[]): string {
+    if (!name) {
+      return 'Bitte gib einen Chatnamen ein.';
+    }
+
+    if (name.length < this.minChatNameLength) {
+      return `Der Chatname muss mindestens ${this.minChatNameLength} Zeichen lang sein.`;
+    }
+
+    if (name.length > this.maxChatNameLength) {
+      return `Der Chatname darf maximal ${this.maxChatNameLength} Zeichen lang sein.`;
+    }
+
+    if (!/^[A-Za-zÄÖÜäöü0-9 _-]+$/.test(name)) {
+      return 'Der Chatname darf nur Buchstaben, Zahlen, Leerzeichen, - und _ enthalten.';
+    }
+
+    if (chatType !== 'GROUP' && chatType !== 'DIRECT') {
+      return 'Ungültiger Chattyp.';
+    }
+
+    if (!this.userIdsInput.trim()) {
+      return 'Bitte gib mindestens eine User-ID ein.';
+    }
+
+    if (this.userIdsInput.length > this.maxUserIdsLength) {
+      return `Die User-ID Eingabe darf maximal ${this.maxUserIdsLength} Zeichen lang sein.`;
+    }
+
+    if (!/^[0-9,\s]+$/.test(this.userIdsInput)) {
+      return 'User-IDs dürfen nur Zahlen und Kommas enthalten.';
+    }
+
+    if (userIds.length === 0) {
+      return 'Bitte gib mindestens eine gültige User-ID ein.';
+    }
+
+    if (chatType === 'GROUP' && userIds.length < 2) {
+      return 'Ein Gruppenchat braucht mindestens 2 User-IDs.';
+    }
+
+    if (chatType === 'DIRECT' && userIds.length !== 2) {
+      return 'Ein Direktchat braucht genau 2 User-IDs.';
+    }
+
+    return '';
   }
 
   private parseUserIds(value: string): number[] {

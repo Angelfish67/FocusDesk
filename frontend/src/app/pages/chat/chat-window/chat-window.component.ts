@@ -10,7 +10,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MessageListComponent } from '../message-list/message-list.component';
 import { AppAuthService } from '../../../service/app.auth.service';
 import { HasRoleDirective } from '../../../dir/has-role.diretive';
-import { ChatApiService, ChatResponse, MessageResponse, UserResponse } from '../../../service/chat-api.service';
+import {
+  ChatApiService,
+  ChatResponse,
+  MessageResponse,
+  UserResponse
+} from '../../../service/chat-api.service';
 
 @Component({
   selector: 'app-chat-window',
@@ -42,17 +47,20 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   canSendMessage = false;
   canOpenAdmin = false;
 
+  readonly minMessageLength = 1;
+  readonly maxMessageLength = 500;
+
   private subscriptions = new Subscription();
 
   ngOnInit(): void {
     this.subscriptions.add(
-      this.appAuthService.hasAnyRole(['update', 'admin']).subscribe(hasRole => {
+      this.appAuthService.hasAnyRole(['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']).subscribe(hasRole => {
         this.canSendMessage = hasRole;
       })
     );
 
     this.subscriptions.add(
-      this.appAuthService.hasAnyRole(['admin']).subscribe(hasRole => {
+      this.appAuthService.hasAnyRole(['ROLE_ADMIN', 'admin']).subscribe(hasRole => {
         this.canOpenAdmin = hasRole;
       })
     );
@@ -106,9 +114,20 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const content = this.messageText.trim();
+    if (!this.selectedChat) {
+      this.errorMessage = 'Bitte wähle zuerst einen Chat aus.';
+      return;
+    }
 
-    if (!content || !this.selectedChat || this.sendingMessage) {
+    if (this.sendingMessage) {
+      return;
+    }
+
+    const content = this.messageText.trim();
+    const validationError = this.validateMessage(content);
+
+    if (validationError) {
+      this.errorMessage = validationError;
       return;
     }
 
@@ -140,6 +159,26 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
         this.sendingMessage = false;
       }
     });
+  }
+
+  private validateMessage(content: string): string {
+    if (!content) {
+      return 'Bitte gib eine Nachricht ein.';
+    }
+
+    if (content.length < this.minMessageLength) {
+      return `Die Nachricht muss mindestens ${this.minMessageLength} Zeichen lang sein.`;
+    }
+
+    if (content.length > this.maxMessageLength) {
+      return `Die Nachricht darf maximal ${this.maxMessageLength} Zeichen lang sein.`;
+    }
+
+    if (!/^[\p{L}\p{N}\p{P}\p{Zs}\n\r]+$/u.test(content)) {
+      return 'Die Nachricht enthält ungültige Zeichen.';
+    }
+
+    return '';
   }
 
   private getCurrentUserFromSelectedChat(): UserResponse | null {
