@@ -30,10 +30,14 @@
     </div>
   }
 
-  <app-message-list
-    [messages]="messages"
-    [loading]="loadingMessages">
-  </app-message-list>
+<app-message-list
+  [messages]="messages"
+  [loading]="loadingMessages"
+  [canEdit]="canSendMessage"
+  [canDelete]="canOpenAdmin"
+  (updateMessage)="updateMessage($event.id, $event.content)"
+  (deleteMessage)="deleteMessage($event)">
+</app-message-list>
 
   @if (canSendMessage) {
     <div class="message-input">

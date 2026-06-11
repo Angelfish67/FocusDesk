@@ -5,8 +5,11 @@ import ch.samira.tesan.kitcord.chat.ChatRepository;
 import ch.samira.tesan.kitcord.message.dto.CreateMessageRequest;
 import ch.samira.tesan.kitcord.message.dto.UpdateMessageRequest;
 import ch.samira.tesan.kitcord.user.User;
-import ch.samira.tesan.kitcord.user.UserRepository;
+import ch.samira.tesan.kitcord.user.UserService;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,16 +19,16 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     public MessageService(
             MessageRepository messageRepository,
             ChatRepository chatRepository,
-            UserRepository userRepository
+            UserService userService
     ) {
         this.messageRepository = messageRepository;
         this.chatRepository = chatRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public List<Message> getMessages() {
@@ -46,8 +49,7 @@ public class MessageService {
         Chat chat = chatRepository.findById(request.getChatId())
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
 
-        User sender = userRepository.findById(request.getSenderId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User sender = getCurrentUser();
 
         if (!chat.getUsers().contains(sender)) {
             throw new RuntimeException("Sender is not a member of this chat");
@@ -72,5 +74,15 @@ public class MessageService {
     public void deleteMessage(Long id) {
         Message message = getMessageById(id);
         messageRepository.delete(message);
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
+            throw new RuntimeException("User is not authenticated");
+        }
+
+        return userService.syncCurrentUser(jwt);
     }
 }

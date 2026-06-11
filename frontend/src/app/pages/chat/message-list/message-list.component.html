@@ -17,19 +17,83 @@
     <div class="message">
 
       <div class="avatar">
-        {{ getInitial(message.sender.username) }}
+        {{ getInitial(message) }}
       </div>
 
       <div class="message-content">
 
         <div class="message-top">
-          <strong>{{ message.sender.username }}</strong>
-          <span>{{ message.sentAt | date:'HH:mm' }}</span>
+          <strong>{{ getUsername(message) }}</strong>
+
+          @if (getSentAt(message)) {
+            <span>{{ getSentAt(message) | date:'HH:mm' }}</span>
+          }
         </div>
 
-        <p>{{ message.content }}</p>
+        @if (editingMessageId === message.id) {
+          <div class="edit-box">
+            <input
+              type="text"
+              [(ngModel)]="editingContent"
+              maxlength="500"
+              (keydown.enter)="saveEdit(message)"
+              (keydown.escape)="cancelEdit()"
+            >
+
+            <button
+              mat-icon-button
+              color="primary"
+              type="button"
+              [disabled]="!editingContent.trim()"
+              (click)="saveEdit(message)"
+              title="Speichern"
+            >
+              <mat-icon>check</mat-icon>
+            </button>
+
+            <button
+              mat-icon-button
+              type="button"
+              (click)="cancelEdit()"
+              title="Abbrechen"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        } @else {
+          <p>{{ getContent(message) }}</p>
+        }
 
       </div>
+
+      @if (canEdit || canDelete) {
+        <div class="message-actions">
+
+          @if (canEdit) {
+            <button
+              mat-icon-button
+              type="button"
+              (click)="startEdit(message)"
+              title="Nachricht bearbeiten"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+
+          @if (canDelete) {
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              (click)="confirmDelete(message)"
+              title="Nachricht löschen"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+
+        </div>
+      }
 
     </div>
 

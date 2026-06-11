@@ -41,11 +41,6 @@ public User syncCurrentUser(Jwt jwt) {
     String firstName = jwt.getClaimAsString("given_name");
     String lastName = jwt.getClaimAsString("family_name");
 
-    System.out.println("SYNC USER CALLED");
-    System.out.println("Keycloak ID: " + keycloakId);
-    System.out.println("Username: " + username);
-    System.out.println("Email: " + email);
-
     return userRepository.findByKeycloakId(keycloakId)
             .orElseGet(() -> {
                 User user = new User();

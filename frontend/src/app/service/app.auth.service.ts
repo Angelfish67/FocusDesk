@@ -9,7 +9,7 @@ import {
 } from 'angular-oauth2-oidc';
 import { BehaviorSubject, Observable, of, firstValueFrom } from 'rxjs';
 
-import { AuthApiService } from './auth-api.service';
+import { UserApiService } from './user-api.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +18,7 @@ export class AppAuthService {
   private oauthService = inject(OAuthService);
   private authConfig = inject(AuthConfig);
   private router = inject(Router);
-  private authApiService = inject(AuthApiService);
+  private userApiService = inject(UserApiService);
 
   private jwtHelper = new JwtHelperService();
 
@@ -161,7 +161,7 @@ export class AppAuthService {
 
   try {
     console.log('Starte User-Sync mit Backend...');
-    const user = await firstValueFrom(this.authApiService.syncCurrentUser());
+    const user = await firstValueFrom(this.userApiService.syncCurrentUser());
     console.log('User wurde synchronisiert:', user);
   } catch (error) {
     console.error('User konnte nicht mit Backend synchronisiert werden:', error);

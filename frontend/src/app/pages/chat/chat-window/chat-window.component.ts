@@ -12,10 +12,12 @@ import { AppAuthService } from '../../../service/app.auth.service';
 import { HasRoleDirective } from '../../../dir/has-role.diretive';
 import {
   ChatApiService,
-  ChatResponse,
-  MessageResponse,
-  UserResponse
+  ChatResponse
 } from '../../../service/chat-api.service';
+import {
+  MessageApiService,
+  MessageResponse
+} from '../../../service/message-api.service';
 
 @Component({
   selector: 'app-chat-window',
@@ -33,6 +35,7 @@ import {
 })
 export class ChatWindowComponent implements OnInit, OnDestroy {
   private chatApiService = inject(ChatApiService);
+  private messageApiService = inject(MessageApiService);
   private appAuthService = inject(AppAuthService);
   private router = inject(Router);
 
@@ -54,15 +57,19 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.add(
-      this.appAuthService.hasAnyRole(['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']).subscribe(hasRole => {
-        this.canSendMessage = hasRole;
-      })
+      this.appAuthService
+        .hasAnyRole(['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin'])
+        .subscribe(hasRole => {
+          this.canSendMessage = hasRole;
+        })
     );
 
     this.subscriptions.add(
-      this.appAuthService.hasAnyRole(['ROLE_ADMIN', 'admin']).subscribe(hasRole => {
-        this.canOpenAdmin = hasRole;
-      })
+      this.appAuthService
+        .hasAnyRole(['ROLE_ADMIN', 'admin'])
+        .subscribe(hasRole => {
+          this.canOpenAdmin = hasRole;
+        })
     );
 
     this.subscriptions.add(
@@ -95,7 +102,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     this.loadingMessages = true;
     this.errorMessage = '';
 
-    this.chatApiService.getMessagesByChat(chatId).subscribe({
+    this.messageApiService.getMessagesByChatId(chatId).subscribe({
       next: messages => {
         this.messages = messages ?? [];
         this.loadingMessages = false;
@@ -131,20 +138,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const sender = this.getCurrentUserFromSelectedChat();
-
-    if (!sender) {
-      this.errorMessage = 'In diesem Chat wurde kein Benutzer gefunden.';
-      return;
-    }
-
     this.sendingMessage = true;
     this.errorMessage = '';
 
-    this.chatApiService.sendMessage({
-      content,
+    this.messageApiService.sendMessage({
       chatId: this.selectedChat.id,
-      senderId: sender.id
+      content
     }).subscribe({
       next: message => {
         this.messages = [...this.messages, message];
@@ -153,10 +152,58 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
       },
       error: error => {
         console.error('Nachricht konnte nicht gesendet werden:', error);
-        this.errorMessage = typeof error?.error === 'string'
-          ? error.error
-          : 'Nachricht konnte nicht gesendet werden.';
+        this.errorMessage = this.extractErrorMessage(
+          error,
+          'Nachricht konnte nicht gesendet werden.'
+        );
         this.sendingMessage = false;
+      }
+    });
+  }
+
+  updateMessage(messageId: number, content: string): void {
+    const trimmedContent = content.trim();
+    const validationError = this.validateMessage(trimmedContent);
+
+    if (validationError) {
+      this.errorMessage = validationError;
+      return;
+    }
+
+    this.messageApiService.updateMessage(messageId, {
+      content: trimmedContent
+    }).subscribe({
+      next: updatedMessage => {
+        this.messages = this.messages.map(message =>
+          message.id === messageId ? updatedMessage : message
+        );
+      },
+      error: error => {
+        console.error('Nachricht konnte nicht aktualisiert werden:', error);
+        this.errorMessage = this.extractErrorMessage(
+          error,
+          'Nachricht konnte nicht aktualisiert werden.'
+        );
+      }
+    });
+  }
+
+  deleteMessage(messageId: number): void {
+    if (!this.canOpenAdmin) {
+      this.errorMessage = 'Du hast keine Berechtigung, Nachrichten zu löschen.';
+      return;
+    }
+
+    this.messageApiService.deleteMessage(messageId).subscribe({
+      next: () => {
+        this.messages = this.messages.filter(message => message.id !== messageId);
+      },
+      error: error => {
+        console.error('Nachricht konnte nicht gelöscht werden:', error);
+        this.errorMessage = this.extractErrorMessage(
+          error,
+          'Nachricht konnte nicht gelöscht werden.'
+        );
       }
     });
   }
@@ -181,52 +228,15 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  private getCurrentUserFromSelectedChat(): UserResponse | null {
-    if (!this.selectedChat?.users?.length) {
-      return null;
+  private extractErrorMessage(error: any, fallback: string): string {
+    if (typeof error?.error === 'string') {
+      return error.error;
     }
 
-    const token = this.appAuthService.decodedAccessToken ?? {};
-    const claims = this.appAuthService.getIdentityClaims?.() ?? {};
-
-    const currentUserValues = [
-      token?.sub,
-      token?.preferred_username,
-      token?.name,
-      token?.email,
-      claims['sub'],
-      claims['preferred_username'],
-      claims['name'],
-      claims['email']
-    ]
-      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-      .map(value => value.trim().toLowerCase());
-
-    const matchedUser = this.selectedChat.users.find(user => {
-      const userValues = [
-        user.keycloakId,
-        user.username,
-        user.email,
-        user.firstName,
-        user.lastName,
-        `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
-      ]
-        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-        .map(value => value.trim().toLowerCase());
-
-      return userValues.some(userValue =>
-        currentUserValues.some(currentUserValue =>
-          userValue === currentUserValue ||
-          userValue.includes(currentUserValue) ||
-          currentUserValue.includes(userValue)
-        )
-      );
-    });
-
-    if (matchedUser) {
-      return matchedUser;
+    if (error?.error?.message) {
+      return error.error.message;
     }
 
-    return this.selectedChat.users[0] ?? null;
+    return fallback;
   }
 }

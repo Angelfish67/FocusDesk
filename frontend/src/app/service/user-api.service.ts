@@ -33,6 +33,12 @@ export interface PasswordChangeRequest {
   newPassword: string;
 }
 
+export interface CurrentUserResponse {
+  id: number;
+  username: string;
+  email?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -55,12 +61,12 @@ export class UserApiService {
     );
   }
 
-  syncCurrentUser(): Observable<UserResponse> {
-    return this.http.post<UserResponse>(
-      `${this.apiUrl}/users/me/sync`,
-      {}
-    );
-  }
+  syncCurrentUser(): Observable<CurrentUserResponse> {
+      return this.http.post<CurrentUserResponse>(
+        `${this.apiUrl}/users/me/sync`,
+        {}
+      );
+    }
 
   getCurrentUser(): Observable<UserResponse> {
     return this.http.get<UserResponse>(
