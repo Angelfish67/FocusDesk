@@ -7,6 +7,7 @@ import { NoAccessComponent } from './pages/no-access/no-access.component';
 import { ChatLayoutComponent } from './pages/chat/chat-layout/chat-layout.component';
 import { AdminConsoleComponent } from './pages/admin/admin-console.component';
 import { AppAuthGuard } from './guard/app.auth.guard';
+import { CallbackComponent } from './pages/callback/callback.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
@@ -16,7 +17,7 @@ export const routes: Routes = [
 
   {
     path: 'auth/callback',
-    component: HomepageComponent
+    component: CallbackComponent  
   },
 
   {

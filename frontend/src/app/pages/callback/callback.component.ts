@@ -2,17 +2,29 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
+import { AppAuthService } from '../../service/app.auth.service';
+
 @Component({
-  selector: 'app-auth-callback',
+  selector: 'app-callback',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './auth-callback.component.html',
-  styleUrls: ['./auth-callback.component.scss']
+  templateUrl: './callback.component.html',
+  styleUrls: ['./callback.component.scss']
 })
-export class AuthCallbackComponent implements OnInit {
+export class CallbackComponent implements OnInit {
+  private appAuthService = inject(AppAuthService);
   private router = inject(Router);
 
   async ngOnInit(): Promise<void> {
-    await this.router.navigateByUrl('/chat', { replaceUrl: true });
+    await this.appAuthService.initAuth();
+
+    setTimeout(async () => {
+      if (this.appAuthService.hasValidAccessToken()) {
+        await this.router.navigate(['/chat'], { replaceUrl: true });
+        return;
+      }
+
+      await this.router.navigate(['/login'], { replaceUrl: true });
+    }, 300);
   }
 }

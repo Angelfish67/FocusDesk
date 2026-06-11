@@ -68,10 +68,6 @@ export class AppAuthService {
 
     this.initialized = true;
     this.handleEvents(null);
-
-    if (this.hasValidAccessToken() && this.isOAuthCallbackUrl()) {
-      await this.router.navigateByUrl('/chat', { replaceUrl: true });
-    }
   }
 
   public getAccessToken(): string {
@@ -139,16 +135,18 @@ export class AppAuthService {
     this.oauthService.initCodeFlow();
   }
 
-  public register(): void {
-    const registerUrl =
-      'http://localhost:8080/realms/kitcord/protocol/openid-connect/registrations' +
-      '?client_id=kitcord' +
-      '&response_type=code' +
-      '&scope=openid%20profile%20email%20roles%20offline_access' +
-      '&redirect_uri=' + encodeURIComponent('http://localhost:4200/auth/callback');
+ public async register(): Promise<void> {
+  await this.initAuth();
 
-    window.location.href = registerUrl;
+  if (this.hasValidAccessToken()) {
+    await this.router.navigateByUrl('/chat');
+    return;
   }
+
+  this.oauthService.initCodeFlow(undefined, {
+    action: 'register'
+  });
+}
 
   public logout(): void {
     this.oauthService.logOut();
@@ -210,10 +208,9 @@ export class AppAuthService {
     this.useraliasSubject.next(preferredUsername);
   }
 
-  private isOAuthCallbackUrl(): boolean {
-    const url = window.location.href;
-    return url.includes('/auth/callback') && url.includes('code=') && url.includes('state=');
-  }
+private isOAuthCallbackUrl(): boolean {
+  return window.location.pathname === '/auth/callback';
+}
 
   private normalizeRole(role: string): string {
     return role
