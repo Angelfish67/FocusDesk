@@ -1,29 +1,21 @@
 import { Component, inject } from '@angular/core';
-import {AppAuthService} from '../../service/app.auth.service';
-import {HeaderService} from '../../service/header.service';
-import {OAuthService} from 'angular-oauth2-oidc';
-import { MatIcon } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 
-import { AppLoginComponent } from '../../components/app-login/app-login.component';
+import { AppAuthService } from '../../service/app.auth.service';
 
 @Component({
-    selector: 'app-no-access',
-    templateUrl: './no-access.component.html',
-    styleUrls: ['./no-access.component.scss'],
-    imports: [MatIcon, AppLoginComponent]
+  selector: 'app-no-access',
+  standalone: true,
+  imports: [
+    MatIconModule
+  ],
+  templateUrl: './no-access.component.html',
+  styleUrls: ['./no-access.component.scss']
 })
 export class NoAccessComponent {
-  private authService = inject(AppAuthService);
-  private headerService = inject(HeaderService);
-  oauthService = inject(OAuthService);
+  protected oauthService = inject(AppAuthService);
 
-
-  constructor() {
-    this.headerService.setPage('nav.noaccess');
+  login(): void {
+    this.oauthService.login();
   }
-
-  public login() {
-    this.authService.login();
-  }
-
 }

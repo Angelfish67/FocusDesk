@@ -1,7 +1,5 @@
 <div class="no-access-page">
-
   <div class="no-access-card">
-
     <mat-icon class="warning-icon">
       warning_amber
     </mat-icon>
@@ -14,11 +12,13 @@
     </p>
 
     @if (!oauthService.hasValidAccessToken()) {
-      <div class="login-container">
-        <app-login></app-login>
-      </div>
+      <button
+        class="login-button"
+        type="button"
+        (click)="login()"
+      >
+        Mit Keycloak anmelden
+      </button>
     }
-
   </div>
-
 </div>
