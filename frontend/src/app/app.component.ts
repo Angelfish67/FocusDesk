@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { AppAuthService } from './service/app.auth.service';
 
 @Component({
   selector: 'app-root',
@@ -10,5 +11,10 @@ import { RouterOutlet } from '@angular/router';
     RouterOutlet
   ]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  private appAuthService = inject(AppAuthService);
+
+  async ngOnInit(): Promise<void> {
+    await this.appAuthService.initAuth();
+  }
 }

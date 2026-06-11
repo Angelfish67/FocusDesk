@@ -7,6 +7,7 @@ import ch.samira.tesan.kitcord.user.dto.PasswordChangeRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 @Service
 public class UserService {
@@ -28,6 +29,38 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+@Transactional
+public User syncCurrentUser(Jwt jwt) {
+    if (jwt == null) {
+        throw new RuntimeException("JWT is missing");
+    }
+
+    String keycloakId = jwt.getSubject();
+    String username = jwt.getClaimAsString("preferred_username");
+    String email = jwt.getClaimAsString("email");
+    String firstName = jwt.getClaimAsString("given_name");
+    String lastName = jwt.getClaimAsString("family_name");
+
+    System.out.println("SYNC USER CALLED");
+    System.out.println("Keycloak ID: " + keycloakId);
+    System.out.println("Username: " + username);
+    System.out.println("Email: " + email);
+
+    return userRepository.findByKeycloakId(keycloakId)
+            .orElseGet(() -> {
+                User user = new User();
+
+                user.setKeycloakId(keycloakId);
+                user.setUsername(username != null ? username : keycloakId);
+                user.setEmail(email != null ? email : username + "@kitcord.local");
+                user.setFirstName(firstName != null ? firstName : "");
+                user.setLastName(lastName != null ? lastName : "");
+
+                System.out.println("Creating DB user: " + user.getUsername());
+
+                return userRepository.save(user);
+            });
+}
 
     @Transactional
     public User createUser(CreateUserRequest request) {

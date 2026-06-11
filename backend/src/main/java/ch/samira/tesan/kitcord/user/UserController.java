@@ -16,9 +16,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 @Tag(
         name = "UserController",
@@ -80,6 +82,28 @@ public class UserController {
     }
 
     @Operation(
+            summary = "Synchronize current Keycloak user",
+            description = "Creates the currently logged-in Keycloak user in the database if missing.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+
+   @PostMapping("/me/sync")
+public User syncCurrentUser(@AuthenticationPrincipal Jwt jwt) {
+    return userService.syncCurrentUser(jwt);
+}
+
+    @Operation(
+            summary = "Get current user",
+            description = "Returns the currently logged-in user from the database.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyAuthority('ROLE_read', 'ROLE_update', 'ROLE_admin', 'ROLE_READ', 'ROLE_UPDATE', 'ROLE_ADMIN')")
+    public User getCurrentUser(Authentication authentication) {
+        return userService.getUserByKeycloakId(authentication.getName());
+    }
+
+    @Operation(
             summary = "Get user by ID",
             description = "Returns a user by their ID.",
             security = @SecurityRequirement(name = "bearerAuth")
@@ -91,7 +115,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "No permission", content = @Content),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
-    @PreAuthorize("hasAnyAuthority('ROLE_read', 'ROLE_admin')")
+    @PreAuthorize("hasAnyAuthority('ROLE_read', 'ROLE_admin', 'ROLE_READ', 'ROLE_ADMIN')")
     @GetMapping("/{id}")
     public User getUserById(
             @Parameter(description = "User ID", example = "1", required = true)
@@ -112,7 +136,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "No permission", content = @Content),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
-    @PreAuthorize("hasAnyAuthority('ROLE_update', 'ROLE_admin')")
+    @PreAuthorize("hasAnyAuthority('ROLE_update', 'ROLE_admin', 'ROLE_UPDATE', 'ROLE_ADMIN')")
     @DeleteMapping("/delete/{id}")
     public void deleteUser(
             @Parameter(description = "User ID", example = "1", required = true)
@@ -134,17 +158,11 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "No permission", content = @Content),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     })
-    @PreAuthorize("hasAnyAuthority('ROLE_update', 'ROLE_admin')")
+    @PreAuthorize("hasAnyAuthority('ROLE_update', 'ROLE_admin', 'ROLE_UPDATE', 'ROLE_ADMIN')")
     @PutMapping("/change_password")
     public void changePassword(
             @Valid @RequestBody PasswordChangeRequest passwordChangeRequest
     ) {
         userService.changePassword(passwordChangeRequest);
     }
-
-    @PreAuthorize("hasAnyAuthority('ROLE_read', 'ROLE_admin')")
-@GetMapping("/me")
-public User getCurrentUser(Authentication authentication) {
-    return userService.getUserByKeycloakId(authentication.getName());
-}
 }

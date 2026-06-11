@@ -7,7 +7,9 @@ import {
   OAuthEvent,
   OAuthService
 } from 'angular-oauth2-oidc';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, firstValueFrom } from 'rxjs';
+
+import { AuthApiService } from './auth-api.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +18,7 @@ export class AppAuthService {
   private oauthService = inject(OAuthService);
   private authConfig = inject(AuthConfig);
   private router = inject(Router);
+  private authApiService = inject(AuthApiService);
 
   private jwtHelper = new JwtHelperService();
 
@@ -33,6 +36,7 @@ export class AppAuthService {
 
   private initialized = false;
   private initPromise: Promise<void> | null = null;
+  private userSynced = false;
 
   get decodedAccessToken(): any {
     return this._decodedAccessToken;
@@ -66,6 +70,7 @@ export class AppAuthService {
 
     if (this.hasValidAccessToken()) {
       this.oauthService.setupAutomaticSilentRefresh();
+      await this.syncUserWithBackend();
     }
 
     this.initialized = true;
@@ -130,6 +135,7 @@ export class AppAuthService {
     await this.initAuth();
 
     if (this.hasValidAccessToken()) {
+      await this.syncUserWithBackend();
       await this.router.navigateByUrl('/chat');
       return;
     }
@@ -146,6 +152,21 @@ export class AppAuthService {
       post_logout_redirect_uri: this.authConfig.postLogoutRedirectUri
     });
   }
+
+ private async syncUserWithBackend(): Promise<void> {
+  if (!this.hasValidAccessToken()) {
+    console.log('Kein gültiger Access Token, User-Sync übersprungen.');
+    return;
+  }
+
+  try {
+    console.log('Starte User-Sync mit Backend...');
+    const user = await firstValueFrom(this.authApiService.syncCurrentUser());
+    console.log('User wurde synchronisiert:', user);
+  } catch (error) {
+    console.error('User konnte nicht mit Backend synchronisiert werden:', error);
+  }
+}
 
   private clearLocalAuthState(): void {
     sessionStorage.removeItem('access_token');
@@ -165,6 +186,7 @@ export class AppAuthService {
     this._decodedAccessToken = null;
     this.initialized = false;
     this.initPromise = null;
+    this.userSynced = false;
   }
 
   private handleEvents(event: OAuthEvent | null): void {
