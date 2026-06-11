@@ -1,6 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
+
+type JwtPayload = {
+  preferred_username?: string;
+  name?: string;
+  given_name?: string;
+  email?: string;
+};
 
 @Component({
   selector: 'app-user-profile',
@@ -13,11 +20,11 @@ import { Router, RouterModule } from '@angular/router';
   styleUrls: ['./user-profile.component.scss']
 })
 export class UserProfileComponent implements OnInit {
+  private router = inject(Router);
+
   username = 'Benutzer';
   status = 'Online';
   initials = '?';
-
-  constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.loadUserFromToken();
@@ -49,21 +56,25 @@ export class UserProfileComponent implements OnInit {
     this.initials = this.createInitials(displayName);
   }
 
-  private decodeJwtPayload(token: string): any {
+  private decodeJwtPayload(token: string): JwtPayload | null {
     try {
       const payload = token.split('.')[1];
+
+      if (!payload) {
+        return null;
+      }
+
       const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
 
       const decodedPayload = decodeURIComponent(
         atob(normalizedPayload)
           .split('')
-          .map(char => '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2))
+          .map(char => `%${('00' + char.charCodeAt(0).toString(16)).slice(-2)}`)
           .join('')
       );
 
-      return JSON.parse(decodedPayload);
-    } catch (error) {
-      console.error('Token konnte nicht gelesen werden:', error);
+      return JSON.parse(decodedPayload) as JwtPayload;
+    } catch {
       return null;
     }
   }

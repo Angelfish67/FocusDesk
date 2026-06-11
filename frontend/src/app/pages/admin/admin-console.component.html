@@ -5,12 +5,18 @@
       <h1>Admin-Konsole</h1>
       <p class="subtitle">{{ dashboardMessage || 'Adminbereich wird geladen ...' }}</p>
     </div>
-
-    <a routerLink="/chat" mat-stroked-button>
-      <mat-icon>arrow_back</mat-icon>
-      Zurück zum Chat
-    </a>
   </header>
+
+<div class="admin-top-actions">
+  <button
+    type="button"
+    class="admin-chat-button"
+    routerLink="/chat"
+  >
+    <mat-icon>arrow_back</mat-icon>
+    <span>Zurück zu Chats</span>
+  </button>
+</div>
 
   @if (errorMessage) {
     <div class="alert error">
@@ -78,6 +84,67 @@
     }
 
     @if (!loading && activeTab === 'users') {
+      <section class="user-form">
+        <h2>{{ editingUserId ? 'Benutzer bearbeiten' : 'Benutzer erstellen' }}</h2>
+
+        <div class="form-grid">
+          <input
+            type="text"
+            placeholder="Benutzername"
+            [(ngModel)]="userForm.username"
+            maxlength="50"
+          >
+
+          <input
+            type="email"
+            placeholder="E-Mail"
+            [(ngModel)]="userForm.email"
+            maxlength="100"
+          >
+
+          <input
+            type="text"
+            placeholder="Vorname"
+            [(ngModel)]="userForm.firstName"
+            maxlength="50"
+          >
+
+          <input
+            type="text"
+            placeholder="Nachname"
+            [(ngModel)]="userForm.lastName"
+            maxlength="50"
+          >
+
+          <input
+            type="text"
+            placeholder="Keycloak ID"
+            [(ngModel)]="userForm.keycloakId"
+            maxlength="100"
+          >
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="primary-button"
+            (click)="saveUser()"
+          >
+            {{ editingUserId ? 'Speichern' : 'Erstellen' }}
+          </button>
+
+          @if (editingUserId) {
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="cancelEdit()"
+            >
+              Abbrechen
+            </button>
+          }
+        </div>
+      </section>
+
       <div class="table-wrapper">
         <table>
           <thead>
@@ -87,6 +154,7 @@
               <th>E-Mail</th>
               <th>Vorname</th>
               <th>Nachname</th>
+              <th>Keycloak ID</th>
               <th>Aktion</th>
             </tr>
           </thead>
@@ -99,7 +167,16 @@
                 <td>{{ user.email || '-' }}</td>
                 <td>{{ user.firstName || '-' }}</td>
                 <td>{{ user.lastName || '-' }}</td>
-                <td>
+                <td>{{ user.keycloakId || '-' }}</td>
+                <td class="action-cell">
+                  <button
+                    type="button"
+                    class="secondary-button"
+                    (click)="startEditUser(user)"
+                  >
+                    Bearbeiten
+                  </button>
+
                   <button
                     type="button"
                     class="danger-button"
@@ -111,7 +188,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="empty">Keine Benutzer gefunden.</td>
+                <td colspan="7" class="empty">Keine Benutzer gefunden.</td>
               </tr>
             }
           </tbody>

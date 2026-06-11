@@ -1,21 +1,30 @@
 {
   "root": true,
   "ignorePatterns": [
-    "projects/**/*"
+    "projects/**/*",
+    "dist/**/*",
+    "coverage/**/*",
+    ".angular/**/*",
+    "node_modules/**/*"
   ],
   "overrides": [
     {
-      "files": [
-        "*.ts"
-      ],
+      "files": ["*.ts"],
       "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
-        "plugin:@angular-eslint/recommended",
-        "plugin:@angular-eslint/template/process-inline-templates"
+        "plugin:@angular-eslint/recommended"
       ],
+      "parserOptions": {
+        "project": [
+          "./tsconfig.app.json",
+          "./tsconfig.spec.json"
+        ],
+        "createDefaultProgram": true
+      },
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
         "@angular-eslint/directive-selector": [
           "error",
           {
@@ -35,9 +44,7 @@
       }
     },
     {
-      "files": [
-        "*.html"
-      ],
+      "files": ["*.html"],
       "extends": [
         "plugin:@angular-eslint/template/recommended",
         "plugin:@angular-eslint/template/accessibility"

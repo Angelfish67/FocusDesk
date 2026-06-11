@@ -8,6 +8,22 @@ import {
   UserResponse
 } from './chat-api.service';
 
+export type AdminCreateUserRequest = {
+  username: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  keycloakId?: string;
+};
+
+export type AdminUpdateUserRequest = {
+  username: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  keycloakId?: string;
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,15 +47,40 @@ export class AdminApiService {
     return this.http.get<UserResponse[]>(`${this.apiUrl}/admin/users`);
   }
 
-  getChats(): Observable<ChatResponse[]> {
-    return this.http.get<ChatResponse[]>(`${this.apiUrl}/admin/chats`);
+  createUser(
+    request: AdminCreateUserRequest
+  ): Observable<UserResponse> {
+    return this.http.post<UserResponse>(
+      `${this.apiUrl}/admin/users`,
+      request
+    );
   }
 
-  getMessages(): Observable<MessageResponse[]> {
-    return this.http.get<MessageResponse[]>(`${this.apiUrl}/admin/messages`);
+  updateUser(
+    id: number,
+    request: AdminUpdateUserRequest
+  ): Observable<UserResponse> {
+    return this.http.put<UserResponse>(
+      `${this.apiUrl}/admin/users/${id}`,
+      request
+    );
   }
 
   deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/admin/users/${id}`);
+    return this.http.delete<void>(
+      `${this.apiUrl}/admin/users/${id}`
+    );
+  }
+
+  getChats(): Observable<ChatResponse[]> {
+    return this.http.get<ChatResponse[]>(
+      `${this.apiUrl}/admin/chats`
+    );
+  }
+
+  getMessages(): Observable<MessageResponse[]> {
+    return this.http.get<MessageResponse[]>(
+      `${this.apiUrl}/admin/messages`
+    );
   }
 }

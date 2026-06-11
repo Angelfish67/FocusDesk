@@ -1,5 +1,7 @@
 package ch.samira.tesan.kitcord.admin;
 
+import ch.samira.tesan.kitcord.admin.dto.AdminCreateUserRequest;
+import ch.samira.tesan.kitcord.admin.dto.AdminUpdateUserRequest;
 import ch.samira.tesan.kitcord.chat.Chat;
 import ch.samira.tesan.kitcord.message.Message;
 import ch.samira.tesan.kitcord.user.User;
@@ -9,11 +11,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @Tag(
@@ -75,6 +79,46 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(adminService.getAllUsers());
+    }
+
+    @Operation(
+            summary = "Create user",
+            description = "Creates a new user as administrator."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+            @ApiResponse(responseCode = "403", description = "No permission", content = @Content)
+    })
+    @PreAuthorize("hasAuthority('ROLE_admin')")
+    @PostMapping("/users")
+    public ResponseEntity<User> createUser(@Valid @RequestBody AdminCreateUserRequest request) {
+        User createdUser = adminService.createUser(request);
+
+        return ResponseEntity
+                .created(URI.create("/admin/users/" + createdUser.getId()))
+                .body(createdUser);
+    }
+
+    @Operation(
+            summary = "Update user",
+            description = "Updates an existing user by id."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+            @ApiResponse(responseCode = "403", description = "No permission", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+    })
+    @PreAuthorize("hasAuthority('ROLE_admin')")
+    @PutMapping("/users/{id}")
+    public ResponseEntity<User> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUpdateUserRequest request
+    ) {
+        return ResponseEntity.ok(adminService.updateUser(id, request));
     }
 
     @Operation(

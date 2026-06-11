@@ -1,5 +1,7 @@
 package ch.samira.tesan.kitcord.admin;
 
+import ch.samira.tesan.kitcord.admin.dto.AdminCreateUserRequest;
+import ch.samira.tesan.kitcord.admin.dto.AdminUpdateUserRequest;
 import ch.samira.tesan.kitcord.chat.Chat;
 import ch.samira.tesan.kitcord.chat.ChatRepository;
 import ch.samira.tesan.kitcord.message.Message;
@@ -38,6 +40,33 @@ public class AdminService {
 
     public List<Message> getAllMessages() {
         return messageRepository.findAll();
+    }
+
+    @Transactional
+    public User createUser(AdminCreateUserRequest request) {
+        User user = new User();
+
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setKeycloakId(request.getKeycloakId());
+
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public User updateUser(Long id, AdminUpdateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setKeycloakId(request.getKeycloakId());
+
+        return userRepository.save(user);
     }
 
     @Transactional

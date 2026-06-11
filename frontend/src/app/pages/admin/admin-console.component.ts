@@ -1,11 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-import { AdminApiService } from '../../service/admin-api.service';
+import {
+  AdminApiService,
+  AdminCreateUserRequest,
+  AdminUpdateUserRequest
+} from '../../service/admin-api.service';
 import {
   ChatResponse,
   MessageResponse,
@@ -19,6 +24,7 @@ type AdminTab = 'users' | 'chats' | 'messages';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterLink,
     MatButtonModule,
     MatIconModule
@@ -41,6 +47,16 @@ export class AdminConsoleComponent implements OnInit {
   loading = false;
   errorMessage = '';
   successMessage = '';
+
+  editingUserId: number | null = null;
+
+  userForm: AdminCreateUserRequest = {
+    username: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    keycloakId: ''
+  };
 
   ngOnInit(): void {
     this.loadData();
@@ -104,6 +120,101 @@ export class AdminConsoleComponent implements OnInit {
     this.successMessage = '';
   }
 
+  saveUser(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const username = this.userForm.username.trim();
+
+    if (username.length < 2) {
+      this.errorMessage = 'Der Benutzername muss mindestens 2 Zeichen lang sein.';
+      return;
+    }
+
+    const request: AdminCreateUserRequest | AdminUpdateUserRequest = {
+      username,
+      email: this.cleanOptionalValue(this.userForm.email),
+      firstName: this.cleanOptionalValue(this.userForm.firstName),
+      lastName: this.cleanOptionalValue(this.userForm.lastName),
+      keycloakId: this.cleanOptionalValue(this.userForm.keycloakId)
+    };
+
+    this.loading = true;
+
+    if (this.editingUserId !== null) {
+      this.adminApiService.updateUser(this.editingUserId, request).subscribe({
+        next: updatedUser => {
+          this.users = this.users.map(user =>
+            user.id === updatedUser.id ? updatedUser : user
+          );
+
+          this.successMessage = 'Benutzer wurde aktualisiert.';
+          this.resetUserForm();
+          this.loading = false;
+          this.loadChats();
+          this.loadMessages();
+        },
+        error: error => {
+          console.error(error);
+          this.errorMessage = 'Benutzer konnte nicht aktualisiert werden.';
+          this.loading = false;
+        }
+      });
+
+      return;
+    }
+
+    this.adminApiService.createUser(request).subscribe({
+      next: createdUser => {
+        this.users = [...this.users, createdUser];
+        this.successMessage = 'Benutzer wurde erstellt.';
+        this.resetUserForm();
+        this.loading = false;
+      },
+      error: error => {
+        console.error(error);
+        this.errorMessage = 'Benutzer konnte nicht erstellt werden.';
+        this.loading = false;
+      }
+    });
+  }
+
+  startEditUser(user: UserResponse): void {
+    if (!user.id) {
+      return;
+    }
+
+    this.editingUserId = user.id;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.userForm = {
+      username: user.username ?? '',
+      email: user.email ?? '',
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      keycloakId: user.keycloakId ?? ''
+    };
+  }
+
+  cancelEdit(): void {
+    this.resetUserForm();
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  resetUserForm(): void {
+    this.editingUserId = null;
+
+    this.userForm = {
+      username: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      keycloakId: ''
+    };
+  }
+
   deleteUser(user: UserResponse): void {
     if (!user.id) {
       return;
@@ -122,6 +233,11 @@ export class AdminConsoleComponent implements OnInit {
     this.adminApiService.deleteUser(user.id).subscribe({
       next: () => {
         this.users = this.users.filter(existingUser => existingUser.id !== user.id);
+
+        if (this.editingUserId === user.id) {
+          this.resetUserForm();
+        }
+
         this.successMessage = 'Benutzer wurde gelöscht.';
         this.loading = false;
         this.loadChats();
@@ -147,5 +263,15 @@ export class AdminConsoleComponent implements OnInit {
 
   getMessageSender(message: MessageResponse): string {
     return message.sender?.username || message.sender?.email || '-';
+  }
+
+  private cleanOptionalValue(value: string | undefined): string | undefined {
+    const cleanedValue = value?.trim();
+
+    if (!cleanedValue) {
+      return undefined;
+    }
+
+    return cleanedValue;
   }
 }
