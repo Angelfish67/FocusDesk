@@ -1,0 +1,140 @@
+<section class="profile-page">
+
+  <header class="profile-header">
+    <div>
+      <h1>Profil</h1>
+      <p>Hier kannst du deine Benutzerdaten ansehen und verwalten.</p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="goToChat()"
+    >
+      <mat-icon>chat</mat-icon>
+      Zurück zum Chat
+    </button>
+  </header>
+
+  @if (loading) {
+    <div class="profile-card">
+      Profil wird geladen...
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (currentUser) {
+    <div class="profile-grid">
+
+      <article class="profile-card">
+        <h2>Meine Daten</h2>
+
+        <div class="info-row">
+          <span>ID</span>
+          <strong>{{ currentUser.id }}</strong>
+        </div>
+
+        <div class="info-row">
+          <span>Username</span>
+          <strong>{{ currentUser.username || '-' }}</strong>
+        </div>
+
+        <div class="info-row">
+          <span>E-Mail</span>
+          <strong>{{ currentUser.email || '-' }}</strong>
+        </div>
+
+        <div class="info-row">
+          <span>Keycloak-ID</span>
+          <strong>{{ currentUser.keycloakId || '-' }}</strong>
+        </div>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="syncing"
+          (click)="syncCurrentUser()"
+        >
+          <mat-icon>sync</mat-icon>
+          {{ syncing ? 'Synchronisiere...' : 'Mit Keycloak synchronisieren' }}
+        </button>
+      </article>
+
+      <article class="profile-card">
+        <h2>Passwort ändern</h2>
+
+        <label>
+          Aktuelles Passwort
+          <input
+            type="password"
+            [(ngModel)]="oldPassword"
+            placeholder="Aktuelles Passwort"
+          >
+        </label>
+
+        <label>
+          Neues Passwort
+          <input
+            type="password"
+            [(ngModel)]="newPassword"
+            placeholder="Mindestens 8 Zeichen"
+          >
+        </label>
+
+        <label>
+          Neues Passwort wiederholen
+          <input
+            type="password"
+            [(ngModel)]="repeatNewPassword"
+            placeholder="Neues Passwort wiederholen"
+          >
+        </label>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="savingPassword"
+          (click)="changePassword()"
+        >
+          <mat-icon>lock_reset</mat-icon>
+          {{ savingPassword ? 'Speichert...' : 'Passwort ändern' }}
+        </button>
+      </article>
+
+      <article class="profile-card danger-card">
+        <h2>Gefahrenzone</h2>
+
+        <p>
+          Hier kannst du deinen Benutzer aus der Datenbank löschen.
+        </p>
+
+        <button
+          mat-raised-button
+          color="warn"
+          type="button"
+          [disabled]="deleting"
+          (click)="deleteOwnUser()"
+        >
+          <mat-icon>delete</mat-icon>
+          {{ deleting ? 'Lösche...' : 'Profil löschen' }}
+        </button>
+      </article>
+
+    </div>
+  }
+
+</section>

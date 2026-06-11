@@ -7,6 +7,7 @@ import { ChatLayoutComponent } from './pages/chat/chat-layout/chat-layout.compon
 import { AdminConsoleComponent } from './pages/admin/admin-console.component';
 import { AppAuthGuard } from './guard/app.auth.guard';
 import { CallbackComponent } from './pages/callback/callback.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
@@ -16,6 +17,15 @@ export const routes: Routes = [
   {
     path: 'auth/callback',
     component: CallbackComponent
+  },
+
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    canActivate: [AppAuthGuard],
+    data: {
+      roles: ['ROLE_READ', 'ROLE_UPDATE', 'ROLE_ADMIN', 'read', 'update', 'admin']
+    }
   },
 
   {

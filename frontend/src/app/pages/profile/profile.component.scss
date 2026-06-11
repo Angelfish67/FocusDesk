@@ -1,0 +1,143 @@
+.profile-page {
+  min-height: 100vh;
+  padding: 32px;
+  background: #313338;
+  color: #ffffff;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 32px;
+  }
+
+  p {
+    margin: 8px 0 0;
+    color: #b5bac1;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.profile-card {
+  background: #2b2d31;
+  border: 1px solid #1e1f22;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+
+  h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+  }
+
+  button {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 16px;
+    color: #dbdee1;
+    font-size: 14px;
+  }
+
+  input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #1e1f22;
+    background: #1e1f22;
+    color: #ffffff;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: #5865f2;
+    }
+  }
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #3f4147;
+
+  span {
+    color: #b5bac1;
+  }
+
+  strong {
+    text-align: right;
+    word-break: break-all;
+  }
+}
+
+.alert {
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.alert-error {
+  background: #3f1f25;
+  color: #ffb4b4;
+  border: 1px solid #ff5c5c;
+}
+
+.alert-success {
+  background: #1f3f2d;
+  color: #a7f3c1;
+  border: 1px solid #3ddc84;
+}
+
+.danger-card {
+  border-color: #da373c;
+  grid-column: span 2;
+
+  p {
+    color: #b5bac1;
+  }
+}
+
+@media (max-width: 800px) {
+  .profile-page {
+    padding: 20px;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .danger-card {
+    grid-column: span 1;
+  }
+}

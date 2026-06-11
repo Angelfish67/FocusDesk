@@ -40,6 +40,9 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   selectedChat: ChatResponse | null = null;
 
   showCreateChat = false;
+  showChatList = true;
+  showManageChat = false;
+
   loading = false;
   errorMessage = '';
 
@@ -47,9 +50,15 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   chatType: ChatType = 'GROUP';
   userIdsInput = '';
 
+  editChatName = '';
+  editChatType: ChatType = 'GROUP';
+  manageUserId: number | null = null;
+
   currentUserId: number | null = null;
 
   canCreateChat = false;
+  canUpdateChat = false;
+  canDeleteChat = false;
 
   readonly minChatNameLength = 3;
   readonly maxChatNameLength = 40;
@@ -61,6 +70,13 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.appAuthService.hasAnyRole(['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']).subscribe(hasRole => {
         this.canCreateChat = hasRole;
+        this.canUpdateChat = hasRole;
+      })
+    );
+
+    this.subscriptions.add(
+      this.appAuthService.hasAnyRole(['ROLE_ADMIN', 'admin']).subscribe(hasRole => {
+        this.canDeleteChat = hasRole;
       })
     );
 
@@ -70,12 +86,30 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.chatApiService.selectedChat$.subscribe(chat => {
         this.selectedChat = chat;
+
+        if (chat) {
+          this.editChatName = chat.name;
+          this.editChatType = chat.chatType;
+        } else {
+          this.editChatName = '';
+          this.editChatType = 'GROUP';
+          this.manageUserId = null;
+          this.showManageChat = false;
+        }
       })
     );
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  toggleChatList(): void {
+    this.showChatList = !this.showChatList;
+  }
+
+  toggleManageChat(): void {
+    this.showManageChat = !this.showManageChat;
   }
 
   private loadCurrentUser(): void {
@@ -119,7 +153,17 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   }
 
   selectChat(chat: ChatResponse): void {
-    this.chatApiService.selectChat(chat);
+    this.errorMessage = '';
+
+    this.chatApiService.getChatById(chat.id).subscribe({
+      next: loadedChat => {
+        this.chatApiService.selectChat(loadedChat);
+      },
+      error: error => {
+        console.error('Chat konnte nicht geladen werden:', error);
+        this.errorMessage = 'Chat konnte nicht geladen werden.';
+      }
+    });
   }
 
   toggleCreateChat(): void {
@@ -171,6 +215,7 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
         this.userIdsInput = '';
         this.chatType = 'GROUP';
         this.showCreateChat = false;
+        this.showChatList = true;
         this.loading = false;
       },
       error: error => {
@@ -178,6 +223,209 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
         this.errorMessage = typeof error?.error === 'string'
           ? error.error
           : 'Chat konnte nicht erstellt werden.';
+        this.loading = false;
+      }
+    });
+  }
+
+  updateSelectedChat(): void {
+    if (!this.canUpdateChat) {
+      this.errorMessage = 'Du hast keine Berechtigung, Chats zu bearbeiten.';
+      return;
+    }
+
+    if (!this.selectedChat) {
+      this.errorMessage = 'Bitte wähle zuerst einen Chat aus.';
+      return;
+    }
+
+    const name = this.editChatName.trim();
+    const validationError = this.validateUpdateChatInput(name, this.editChatType);
+
+    if (validationError) {
+      this.errorMessage = validationError;
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.chatApiService.updateChat(this.selectedChat.id, {
+      name,
+      chatType: this.editChatType
+    }).subscribe({
+      next: updatedChat => {
+        this.chats = this.chats.map(chat =>
+          chat.id === updatedChat.id ? updatedChat : chat
+        );
+
+        this.chatApiService.selectChat(updatedChat);
+        this.loading = false;
+      },
+      error: error => {
+        console.error('Chat konnte nicht aktualisiert werden:', error);
+        this.errorMessage = typeof error?.error === 'string'
+          ? error.error
+          : 'Chat konnte nicht aktualisiert werden.';
+        this.loading = false;
+      }
+    });
+  }
+
+  deleteSelectedChat(): void {
+    if (!this.canDeleteChat) {
+      this.errorMessage = 'Du hast keine Berechtigung, Chats zu löschen.';
+      return;
+    }
+
+    if (!this.selectedChat) {
+      this.errorMessage = 'Bitte wähle zuerst einen Chat aus.';
+      return;
+    }
+
+    const chatId = this.selectedChat.id;
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.chatApiService.deleteChat(chatId).subscribe({
+      next: () => {
+        this.chats = this.chats.filter(chat => chat.id !== chatId);
+
+        if (this.chats.length > 0) {
+          this.selectChat(this.chats[0]);
+        } else {
+          this.chatApiService.selectChat(null);
+        }
+
+        this.showManageChat = false;
+        this.loading = false;
+      },
+      error: error => {
+        console.error('Chat konnte nicht gelöscht werden:', error);
+        this.errorMessage = typeof error?.error === 'string'
+          ? error.error
+          : 'Chat konnte nicht gelöscht werden.';
+        this.loading = false;
+      }
+    });
+  }
+
+deleteChat(chat: ChatResponse, event?: MouseEvent): void {
+  event?.stopPropagation();
+
+  if (!this.canDeleteChat) {
+    this.errorMessage = 'Du hast keine Berechtigung, Chats zu löschen.';
+    return;
+  }
+
+  const confirmed = window.confirm(`Möchtest du den Chat "${chat.name || 'Unbenannter Chat'}" wirklich löschen?`);
+
+  if (!confirmed) {
+    return;
+  }
+
+  this.loading = true;
+  this.errorMessage = '';
+
+  this.chatApiService.deleteChat(chat.id).subscribe({
+    next: () => {
+      this.chats = this.chats.filter(existingChat => existingChat.id !== chat.id);
+
+      if (this.selectedChat?.id === chat.id) {
+        if (this.chats.length > 0) {
+          this.selectChat(this.chats[0]);
+        } else {
+          this.chatApiService.selectChat(null);
+        }
+      }
+
+      this.showManageChat = false;
+      this.loading = false;
+    },
+    error: error => {
+      console.error('Chat konnte nicht gelöscht werden:', error);
+      this.errorMessage = typeof error?.error === 'string'
+        ? error.error
+        : 'Chat konnte nicht gelöscht werden.';
+      this.loading = false;
+    }
+  });
+}
+  
+  addUserToSelectedChat(): void {
+    if (!this.canUpdateChat) {
+      this.errorMessage = 'Du hast keine Berechtigung, User hinzuzufügen.';
+      return;
+    }
+
+    if (!this.selectedChat) {
+      this.errorMessage = 'Bitte wähle zuerst einen Chat aus.';
+      return;
+    }
+
+    if (!this.manageUserId || this.manageUserId <= 0) {
+      this.errorMessage = 'Bitte gib eine gültige User-ID ein.';
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.chatApiService.addUserToChat(this.selectedChat.id, this.manageUserId).subscribe({
+      next: updatedChat => {
+        this.chats = this.chats.map(chat =>
+          chat.id === updatedChat.id ? updatedChat : chat
+        );
+
+        this.chatApiService.selectChat(updatedChat);
+        this.manageUserId = null;
+        this.loading = false;
+      },
+      error: error => {
+        console.error('User konnte nicht hinzugefügt werden:', error);
+        this.errorMessage = typeof error?.error === 'string'
+          ? error.error
+          : 'User konnte nicht hinzugefügt werden.';
+        this.loading = false;
+      }
+    });
+  }
+
+  removeUserFromSelectedChat(): void {
+    if (!this.canUpdateChat) {
+      this.errorMessage = 'Du hast keine Berechtigung, User zu entfernen.';
+      return;
+    }
+
+    if (!this.selectedChat) {
+      this.errorMessage = 'Bitte wähle zuerst einen Chat aus.';
+      return;
+    }
+
+    if (!this.manageUserId || this.manageUserId <= 0) {
+      this.errorMessage = 'Bitte gib eine gültige User-ID ein.';
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.chatApiService.removeUserFromChat(this.selectedChat.id, this.manageUserId).subscribe({
+      next: updatedChat => {
+        this.chats = this.chats.map(chat =>
+          chat.id === updatedChat.id ? updatedChat : chat
+        );
+
+        this.chatApiService.selectChat(updatedChat);
+        this.manageUserId = null;
+        this.loading = false;
+      },
+      error: error => {
+        console.error('User konnte nicht entfernt werden:', error);
+        this.errorMessage = typeof error?.error === 'string'
+          ? error.error
+          : 'User konnte nicht entfernt werden.';
         this.loading = false;
       }
     });
@@ -191,7 +439,7 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     return Array.from(new Set([this.currentUserId, ...userIds]));
   }
 
-  private validateChatInput(name: string, chatType: ChatType, enteredUserIds: number[]): string {
+  private validateUpdateChatInput(name: string, chatType: ChatType): string {
     if (!name) {
       return 'Bitte gib einen Chatnamen ein.';
     }
@@ -210,6 +458,16 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
 
     if (chatType !== 'GROUP' && chatType !== 'DIRECT') {
       return 'Ungültiger Chattyp.';
+    }
+
+    return '';
+  }
+
+  private validateChatInput(name: string, chatType: ChatType, enteredUserIds: number[]): string {
+    const updateValidationError = this.validateUpdateChatInput(name, chatType);
+
+    if (updateValidationError) {
+      return updateValidationError;
     }
 
     if (!this.userIdsInput.trim()) {

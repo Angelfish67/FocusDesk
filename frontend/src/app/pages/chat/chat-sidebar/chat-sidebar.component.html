@@ -1,27 +1,44 @@
 <aside class="sidebar">
 
   <div class="sidebar-header">
-    <img src="assets/images/logo.png" alt="Kitcord">
-    <span>Kitcord</span>
+    <div class="sidebar-brand">
+      <img src="assets/images/logo.png" alt="Kitcord">
+      <span>Kitcord</span>
+    </div>
   </div>
 
   <div class="sidebar-section">
 
     <div class="section-title">
-      <h4>Chats</h4>
+      <button
+        class="section-toggle"
+        type="button"
+        (click)="toggleChatList()"
+      >
+        <mat-icon>{{ showChatList ? 'expand_more' : 'chevron_right' }}</mat-icon>
+        <span>Chats</span>
+      </button>
 
       <button
         *appHasRole="['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']"
         class="create-button"
         type="button"
         (click)="toggleCreateChat()"
+        title="Chat erstellen"
       >
-        <mat-icon>add</mat-icon>
+        <mat-icon>{{ showCreateChat ? 'close' : 'add' }}</mat-icon>
       </button>
     </div>
 
     @if (showCreateChat) {
-      <div *appHasRole="['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']" class="create-chat-box">
+      <div *appHasRole="['ROLE_UPDATE', 'ROLE_ADMIN', 'update', 'admin']" class="panel-card">
+
+        <div class="panel-header">
+          <div>
+            <h4>Neuer Chat</h4>
+            <p>Erstelle einen Gruppen- oder Direktchat.</p>
+          </div>
+        </div>
 
         <input
           type="text"
@@ -44,20 +61,13 @@
         >
 
         @if (currentUserId) {
-          <div
-            class="create-chat-info-message"
-            style="color: #38bdf8; background-color: rgba(56, 189, 248, 0.14); border: 1px solid rgba(56, 189, 248, 0.45); border-radius: 8px; padding: 8px 10px; margin: 8px 0; font-size: 13px; line-height: 1.4;"
-          >
+          <div class="info-message">
             Deine eigene User-ID {{ currentUserId }} wird automatisch hinzugefügt.
           </div>
         }
 
-        @if (errorMessage) {
-          <p class="error-message">{{ errorMessage }}</p>
-        }
-
         <button
-          class="save-chat-button"
+          class="primary-action"
           type="button"
           (click)="createChat()"
           [disabled]="loading"
@@ -68,23 +78,134 @@
       </div>
     }
 
-    @if (!showCreateChat && errorMessage) {
+    @if (selectedChat && (canUpdateChat || canDeleteChat)) {
+      <div class="manage-header">
+        <button
+          class="section-toggle"
+          type="button"
+          (click)="toggleManageChat()"
+        >
+          <mat-icon>{{ showManageChat ? 'expand_more' : 'chevron_right' }}</mat-icon>
+          <span>Chat verwalten</span>
+        </button>
+      </div>
+    }
+
+    @if (selectedChat && showManageChat && (canUpdateChat || canDeleteChat)) {
+      <div class="panel-card">
+
+        <div class="panel-header">
+          <div>
+            <h4>{{ selectedChat.name || 'Unbenannter Chat' }}</h4>
+            <p>ID: {{ selectedChat.id }} · {{ selectedChat.chatType }}</p>
+          </div>
+        </div>
+
+        @if (canUpdateChat) {
+          <input
+            type="text"
+            placeholder="Neuer Chatname"
+            [(ngModel)]="editChatName"
+            [minLength]="minChatNameLength"
+            [maxLength]="maxChatNameLength"
+          >
+
+          <button
+            class="primary-action"
+            type="button"
+            (click)="updateSelectedChat()"
+            [disabled]="loading"
+          >
+            Chat speichern
+          </button>
+
+          <div class="divider"></div>
+
+          <input
+            type="number"
+            placeholder="User-ID hinzufügen/entfernen"
+            [(ngModel)]="manageUserId"
+          >
+
+          <div class="split-actions">
+            <button
+              class="secondary-action"
+              type="button"
+              (click)="addUserToSelectedChat()"
+              [disabled]="loading"
+            >
+              Hinzufügen
+            </button>
+
+            <button
+              class="secondary-action"
+              type="button"
+              (click)="removeUserFromSelectedChat()"
+              [disabled]="loading"
+            >
+              Entfernen
+            </button>
+          </div>
+        }
+
+        @if (canDeleteChat) {
+          <div class="divider"></div>
+
+          <button
+            class="danger-action"
+            type="button"
+            (click)="deleteSelectedChat()"
+            [disabled]="loading"
+          >
+            Chat löschen
+          </button>
+        }
+
+      </div>
+    }
+
+    @if (errorMessage) {
       <p class="error-message">{{ errorMessage }}</p>
     }
 
-    @for (chat of chats; track chat.id) {
-      <button
-        class="chat-item"
-        type="button"
-        [class.active]="selectedChat?.id === chat.id"
-        (click)="selectChat(chat)"
-      >
-        <mat-icon>
-          {{ chat.chatType === 'GROUP' ? 'groups' : 'person' }}
-        </mat-icon>
+    @if (showChatList) {
+      <div class="chat-list">
+        @for (chat of chats; track chat.id) {
+          <div
+            class="chat-row"
+            [class.active]="selectedChat?.id === chat.id"
+          >
+            <button
+              class="chat-item"
+              type="button"
+              (click)="selectChat(chat)"
+            >
+              <mat-icon>
+                {{ chat.chatType === 'GROUP' ? 'groups' : 'person' }}
+              </mat-icon>
 
-        <span>{{ chat.name || 'Unbenannter Chat' }}</span>
-      </button>
+              <span>{{ chat.name || 'Unbenannter Chat' }}</span>
+            </button>
+
+            <button
+              *appHasRole="['ROLE_ADMIN', 'admin']"
+              class="chat-delete-button"
+              type="button"
+              title="Chat löschen"
+              (click)="deleteChat(chat, $event)"
+              [disabled]="loading"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        }
+
+        @if (!loading && chats.length === 0) {
+          <div class="empty-state">
+            Keine Chats gefunden.
+          </div>
+        }
+      </div>
     }
 
   </div>

@@ -15,7 +15,21 @@
     </div>
   </div>
 
-  <button class="settings-button" type="button" (click)="logout()">
+  <button
+    class="settings-button"
+    type="button"
+    routerLink="/profile"
+    title="Profil"
+  >
+    <mat-icon>person</mat-icon>
+  </button>
+
+  <button
+    class="settings-button"
+    type="button"
+    (click)="logout()"
+    title="Abmelden"
+  >
     <mat-icon>logout</mat-icon>
   </button>
 

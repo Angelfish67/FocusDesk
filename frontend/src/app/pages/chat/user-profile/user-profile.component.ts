@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
   imports: [
-    MatIconModule
+    MatIconModule,
+    RouterModule
   ],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss']
@@ -52,6 +53,7 @@ export class UserProfileComponent implements OnInit {
     try {
       const payload = token.split('.')[1];
       const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+
       const decodedPayload = decodeURIComponent(
         atob(normalizedPayload)
           .split('')

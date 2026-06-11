@@ -28,6 +28,11 @@ export type CreateChatRequest = {
   userIds: number[];
 };
 
+export type UpdateChatRequest = {
+  name: string;
+  chatType: ChatType;
+};
+
 export type MessageResponse = {
   id: number;
   content: string;
@@ -64,8 +69,35 @@ export class ChatApiService {
     return this.http.get<ChatResponse[]>(`${this.apiUrl}/chats`);
   }
 
+  getChatById(id: number): Observable<ChatResponse> {
+    return this.http.get<ChatResponse>(`${this.apiUrl}/chats/${id}`);
+  }
+
   createChat(request: CreateChatRequest): Observable<ChatResponse> {
     return this.http.post<ChatResponse>(`${this.apiUrl}/chats`, request);
+  }
+
+  updateChat(id: number, request: UpdateChatRequest): Observable<ChatResponse> {
+    return this.http.put<ChatResponse>(`${this.apiUrl}/chats/${id}`, request);
+  }
+
+  deleteChat(id: number): Observable<string> {
+    return this.http.delete(`${this.apiUrl}/chats/${id}`, {
+      responseType: 'text'
+    });
+  }
+
+  addUserToChat(chatId: number, userId: number): Observable<ChatResponse> {
+    return this.http.post<ChatResponse>(
+      `${this.apiUrl}/chats/${chatId}/users/${userId}`,
+      {}
+    );
+  }
+
+  removeUserFromChat(chatId: number, userId: number): Observable<ChatResponse> {
+    return this.http.delete<ChatResponse>(
+      `${this.apiUrl}/chats/${chatId}/users/${userId}`
+    );
   }
 
   getMessagesByChat(chatId: number): Observable<MessageResponse[]> {
