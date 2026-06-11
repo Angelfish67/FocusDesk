@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { HasRoleDirective } from '../../../dir/has-role.diretive';
 import { UserProfileComponent } from '../user-profile/user-profile.component';
 import { AppAuthService } from '../../../service/app.auth.service';
+import { UserApiService } from '../../../service/user-api.service';
 import {
   ChatApiService,
   ChatResponse,
@@ -33,6 +34,7 @@ import {
 export class ChatSidebarComponent implements OnInit, OnDestroy {
   private chatApiService = inject(ChatApiService);
   private appAuthService = inject(AppAuthService);
+  private userApiService = inject(UserApiService);
 
   chats: ChatResponse[] = [];
   selectedChat: ChatResponse | null = null;
@@ -44,6 +46,8 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
   chatName = '';
   chatType: ChatType = 'GROUP';
   userIdsInput = '';
+
+  currentUserId: number | null = null;
 
   canCreateChat = false;
 
@@ -60,6 +64,7 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.loadCurrentUser();
     this.loadChats();
 
     this.subscriptions.add(
@@ -71,6 +76,18 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  private loadCurrentUser(): void {
+    this.userApiService.getCurrentUser().subscribe({
+      next: user => {
+        this.currentUserId = user.id;
+      },
+      error: error => {
+        console.error('Eigener User konnte nicht geladen werden:', error);
+        this.errorMessage = 'Eigener User konnte nicht geladen werden.';
+      }
+    });
   }
 
   loadChats(): void {
@@ -121,12 +138,18 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (!this.currentUserId) {
+      this.errorMessage = 'Deine eigene User-ID konnte noch nicht geladen werden.';
+      return;
+    }
+
     this.errorMessage = '';
 
     const name = this.chatName.trim();
-    const userIds = this.parseUserIds(this.userIdsInput);
+    const enteredUserIds = this.parseUserIds(this.userIdsInput);
+    const userIds = this.addCurrentUserId(enteredUserIds);
 
-    const validationError = this.validateChatInput(name, this.chatType, userIds);
+    const validationError = this.validateChatInput(name, this.chatType, enteredUserIds);
 
     if (validationError) {
       this.errorMessage = validationError;
@@ -141,12 +164,8 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
       userIds
     }).subscribe({
       next: createdChat => {
-        const currentUserValues = this.getCurrentUserValues();
-
-        if (this.isCurrentUserInChat(createdChat, currentUserValues)) {
-          this.chats = [createdChat, ...this.chats];
-          this.selectChat(createdChat);
-        }
+        this.chats = [createdChat, ...this.chats];
+        this.selectChat(createdChat);
 
         this.chatName = '';
         this.userIdsInput = '';
@@ -164,7 +183,15 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     });
   }
 
-  private validateChatInput(name: string, chatType: ChatType, userIds: number[]): string {
+  private addCurrentUserId(userIds: number[]): number[] {
+    if (!this.currentUserId) {
+      return userIds;
+    }
+
+    return Array.from(new Set([this.currentUserId, ...userIds]));
+  }
+
+  private validateChatInput(name: string, chatType: ChatType, enteredUserIds: number[]): string {
     if (!name) {
       return 'Bitte gib einen Chatnamen ein.';
     }
@@ -186,7 +213,7 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     }
 
     if (!this.userIdsInput.trim()) {
-      return 'Bitte gib mindestens eine User-ID ein.';
+      return 'Bitte gib mindestens eine andere User-ID ein.';
     }
 
     if (this.userIdsInput.length > this.maxUserIdsLength) {
@@ -197,16 +224,20 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
       return 'User-IDs dürfen nur Zahlen und Kommas enthalten.';
     }
 
-    if (userIds.length === 0) {
-      return 'Bitte gib mindestens eine gültige User-ID ein.';
+    if (enteredUserIds.length === 0) {
+      return 'Bitte gib mindestens eine gültige andere User-ID ein.';
     }
 
-    if (chatType === 'GROUP' && userIds.length < 2) {
-      return 'Ein Gruppenchat braucht mindestens 2 User-IDs.';
+    if (this.currentUserId && enteredUserIds.includes(this.currentUserId)) {
+      return 'Bitte gib nur andere User-IDs ein. Deine eigene User-ID wird automatisch hinzugefügt.';
     }
 
-    if (chatType === 'DIRECT' && userIds.length !== 2) {
-      return 'Ein Direktchat braucht genau 2 User-IDs.';
+    if (chatType === 'GROUP' && enteredUserIds.length < 1) {
+      return 'Ein Gruppenchat braucht mindestens eine weitere User-ID.';
+    }
+
+    if (chatType === 'DIRECT' && enteredUserIds.length !== 1) {
+      return 'Ein Direktchat braucht genau eine andere User-ID.';
     }
 
     return '';

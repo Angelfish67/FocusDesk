@@ -38,10 +38,19 @@
 
         <input
           type="text"
-          placeholder="User-IDs, z.B. 1, 2, 3"
+          placeholder="Andere User-IDs, z.B. 2, 3"
           [(ngModel)]="userIdsInput"
           [maxLength]="maxUserIdsLength"
         >
+
+        @if (currentUserId) {
+          <div
+            class="create-chat-info-message"
+            style="color: #38bdf8; background-color: rgba(56, 189, 248, 0.14); border: 1px solid rgba(56, 189, 248, 0.45); border-radius: 8px; padding: 8px 10px; margin: 8px 0; font-size: 13px; line-height: 1.4;"
+          >
+            Deine eigene User-ID {{ currentUserId }} wird automatisch hinzugefügt.
+          </div>
+        }
 
         @if (errorMessage) {
           <p class="error-message">{{ errorMessage }}</p>

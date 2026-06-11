@@ -64,6 +64,17 @@
   cursor: pointer;
 }
 
+.sidebar .sidebar-section .create-chat-box p.create-chat-info-message {
+  margin: 0;
+  color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.14) !important;
+  border: 1px solid rgba(56, 189, 248, 0.45) !important;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .create-button:hover {
   background: #35373c;
   color: white;
