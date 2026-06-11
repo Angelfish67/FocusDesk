@@ -11,6 +11,7 @@
       <h4>Chats</h4>
 
       <!-- Structural Directive (*appHasRole) für rollenbasierte Anzeige -->
+        <!-- DOM wird verändert ! Document object model  -->
       <button
         *appHasRole="['update', 'admin']"
         class="create-button"
@@ -35,7 +36,7 @@
           [(ngModel)]="chatName"
         >
 
-        <!-- Template-Driven Form (kein Reactive Form) -->
+        <!-- Template-Driven Form (kein Reactive Form) weil einfaches Formular -->
         <select [(ngModel)]="chatType">
           <option value="GROUP">Gruppenchat</option>
           <option value="DIRECT">Direktchat</option>
@@ -61,7 +62,7 @@
         >
           <!-- Event Binding: (click) -->
           <!-- Property Binding: [disabled] -->
-          <!-- Interpolation mit ternärem Operator -->
+          <!-- Interpolation -->
           {{ loading ? 'Wird geladen...' : 'Chat erstellen' }}
         </button>
 
@@ -73,7 +74,7 @@
       <p class="error-message">{{ errorMessage }}</p>
     }
 
-    <!-- Angular Control Flow Loop (@for) -->
+    <!-- Angular Control Flow (@for) -->
     @for (chat of chats; track chat.id) {
       <button
         class="chat-item"

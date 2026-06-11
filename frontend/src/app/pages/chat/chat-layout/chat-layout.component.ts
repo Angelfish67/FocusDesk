@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ChatSidebarComponent } from '../chat-sidebar/chat-sidebar.component';
 import { ChatWindowComponent } from '../chat-window/chat-window.component';
 
+ // komponente
 @Component({
   selector: 'app-chat-layout',
   standalone: true,

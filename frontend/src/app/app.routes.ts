@@ -16,10 +16,6 @@ export const routes: Routes = [
     component: HomepageComponent
   },
   {
-    path: 'homepage',
-    component: HomepageComponent
-  },
-  {
     path: 'login',
     component: LoginComponent
   },

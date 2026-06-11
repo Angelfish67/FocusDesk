@@ -62,12 +62,13 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(
       // wartet auf antwort, subscribe (observable)
-      this.chatApiService.selectedChat$.subscribe(chat => {
+      this.chatApiService.selectedChat$.subscribe(chat => { // observer
         this.selectedChat = chat;
       })
     );
   }
 
+  // lifecycle hook, zerstört wenn user bspw seite ändert
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }

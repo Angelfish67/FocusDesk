@@ -5,6 +5,7 @@ import { AppAuthService } from '../service/app.auth.service';
 export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
   const authService = inject(AppAuthService);
 
+  // login & register
   const publicUrls = [
     '/users/create',
     '/users/login',
