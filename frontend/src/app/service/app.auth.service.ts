@@ -75,12 +75,7 @@ export class AppAuthService {
   }
 
   public getAccessToken(): string {
-    return (
-      this.oauthService.getAccessToken() ||
-      sessionStorage.getItem('access_token') ||
-      sessionStorage.getItem('accessToken') ||
-      ''
-    );
+    return this.oauthService.getAccessToken() || '';
   }
 
   public hasValidAccessToken(): boolean {
@@ -144,23 +139,26 @@ export class AppAuthService {
     this.oauthService.initCodeFlow();
   }
 
-public register(): void {
-  const registerUrl =
-    'http://localhost:8080/realms/kitcord/protocol/openid-connect/registrations' +
-    '?client_id=kitcord' +
-    '&response_type=code' +
-    '&scope=openid%20profile%20email%20roles%20offline_access' +
-    '&redirect_uri=' + encodeURIComponent('http://localhost:4200/chat');
+  public register(): void {
+    const registerUrl =
+      'http://localhost:8080/realms/kitcord/protocol/openid-connect/registrations' +
+      '?client_id=kitcord' +
+      '&response_type=code' +
+      '&scope=openid%20profile%20email%20roles%20offline_access' +
+      '&redirect_uri=' + encodeURIComponent('http://localhost:4200/auth/callback');
 
-  window.location.href = registerUrl;
-}
+    window.location.href = registerUrl;
+  }
 
   public logout(): void {
     this.oauthService.logOut();
 
     sessionStorage.removeItem('access_token');
-    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('id_token');
     sessionStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('nonce');
+    sessionStorage.removeItem('PKCE_verifier');
+    sessionStorage.removeItem('accessToken');
 
     this.useraliasSubject.next('');
     this.usernameSubject.next('');
@@ -214,7 +212,7 @@ public register(): void {
 
   private isOAuthCallbackUrl(): boolean {
     const url = window.location.href;
-    return url.includes('code=') && url.includes('state=');
+    return url.includes('/auth/callback') && url.includes('code=') && url.includes('state=');
   }
 
   private normalizeRole(role: string): string {

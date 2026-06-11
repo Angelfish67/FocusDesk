@@ -10,39 +10,30 @@
     <div class="section-title">
       <h4>Chats</h4>
 
-      <!-- Structural Directive (*appHasRole) für rollenbasierte Anzeige -->
-        <!-- DOM wird verändert ! Document object model  -->
       <button
         *appHasRole="['update', 'admin']"
         class="create-button"
         type="button"
         (click)="toggleCreateChat()"
       >
-        <!-- Angular Material Icon Component -->
         <mat-icon>add</mat-icon>
       </button>
     </div>
 
-    <!-- Angular Control Flow Block (@if) -->
     @if (showCreateChat) {
-
-      <!-- Eigene Structural Directive -->
       <div *appHasRole="['update', 'admin']" class="create-chat-box">
 
-        <!-- Two-Way Data Binding mit ngModel -->
         <input
           type="text"
           placeholder="Chatname"
           [(ngModel)]="chatName"
         >
 
-        <!-- Template-Driven Form (kein Reactive Form) weil einfaches Formular -->
         <select [(ngModel)]="chatType">
           <option value="GROUP">Gruppenchat</option>
           <option value="DIRECT">Direktchat</option>
         </select>
 
-        <!-- Two-Way Data Binding mit ngModel -->
         <input
           type="text"
           placeholder="User-IDs, z.B. 1, 2, 3"
@@ -50,7 +41,6 @@
         >
 
         @if (errorMessage) {
-          <!-- Interpolation zur Ausgabe von Daten -->
           <p class="error-message">{{ errorMessage }}</p>
         }
 
@@ -60,9 +50,6 @@
           (click)="createChat()"
           [disabled]="loading"
         >
-          <!-- Event Binding: (click) -->
-          <!-- Property Binding: [disabled] -->
-          <!-- Interpolation -->
           {{ loading ? 'Wird geladen...' : 'Chat erstellen' }}
         </button>
 
@@ -70,30 +57,25 @@
     }
 
     @if (!showCreateChat && errorMessage) {
-      <!-- Interpolation -->
       <p class="error-message">{{ errorMessage }}</p>
     }
 
-    <!-- Angular Control Flow (@for) -->
     @for (chat of chats; track chat.id) {
       <button
         class="chat-item"
         [class.active]="selectedChat?.id === chat.id"
         (click)="selectChat(chat)"
       >
-        <!-- Angular Material Icon -->
         <mat-icon>
           {{ chat.chatType === 'GROUP' ? 'groups' : 'person' }}
         </mat-icon>
 
-        <!-- Interpolation -->
         <span>{{ chat.name || 'Unbenannter Chat' }}</span>
       </button>
     }
 
   </div>
 
-  <!-- Eigene Angular Komponente über ihren Selektor -->
   <app-user-profile></app-user-profile>
 
 </aside>

@@ -41,7 +41,7 @@ export const authConfig: AuthConfig = {
   issuer: keycloakIssuer,
   requireHttps: false,
 
-redirectUri: `${frontendBaseUrl}/chat`,
+  redirectUri: `${frontendBaseUrl}/auth/callback`,
   postLogoutRedirectUri: frontendBaseUrl,
 
   clientId: 'kitcord',
