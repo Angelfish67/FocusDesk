@@ -1,9 +1,16 @@
 <div class="auth-page">
   <section class="auth-card">
-    <img src="assets/images/logo.png" alt="Kitcord Logo" class="auth-logo">
+    <img
+      src="assets/images/logo.png"
+      alt="Kitcord Logo"
+      class="auth-logo"
+    >
 
-    <h1>Willkommen zurück</h1>
-    <p>Melde dich direkt über Keycloak an.</p>
+    <h1>Willkommen bei Kitcord</h1>
+
+    <p class="auth-description">
+      Melde dich mit deinem Keycloak-Konto an, um auf deine Chats zuzugreifen.
+    </p>
 
     <button
       class="auth-submit"
@@ -15,10 +22,5 @@
       <mat-icon>login</mat-icon>
       Mit Keycloak anmelden
     </button>
-
-    <p class="auth-switch">
-      Noch kein Konto?
-      <a routerLink="/register">Jetzt registrieren</a>
-    </p>
   </section>
 </div>

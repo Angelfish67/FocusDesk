@@ -137,22 +137,8 @@ export class AppAuthService {
     this.oauthService.initCodeFlow();
   }
 
-  public async register(): Promise<void> {
-    await this.initAuth();
-
-    if (this.hasValidAccessToken()) {
-      await this.router.navigateByUrl('/chat');
-      return;
-    }
-
-    this.oauthService.initCodeFlow(undefined, {
-      action: 'register'
-    });
-  }
-
   public logout(): void {
     this.oauthService.stopAutomaticRefresh();
-
     this.clearLocalAuthState();
 
     this.oauthService.logOut({
