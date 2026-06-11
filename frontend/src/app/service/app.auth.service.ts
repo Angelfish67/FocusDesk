@@ -144,16 +144,16 @@ export class AppAuthService {
     this.oauthService.initCodeFlow();
   }
 
-  public register(): void {
-    const registerUrl =
-      'http://localhost:8080/realms/kitcord/protocol/openid-connect/registrations' +
-      '?client_id=kitcord' +
-      '&response_type=code' +
-      '&scope=openid%20profile%20email%20roles%20offline_access' +
-      '&redirect_uri=' + encodeURIComponent('http://localhost:4200');
+public register(): void {
+  const registerUrl =
+    'http://localhost:8080/realms/kitcord/protocol/openid-connect/registrations' +
+    '?client_id=kitcord' +
+    '&response_type=code' +
+    '&scope=openid%20profile%20email%20roles%20offline_access' +
+    '&redirect_uri=' + encodeURIComponent('http://localhost:4200/chat');
 
-    window.location.href = registerUrl;
-  }
+  window.location.href = registerUrl;
+}
 
   public logout(): void {
     this.oauthService.logOut();

@@ -16,11 +16,14 @@
         type="button"
         (click)="toggleCreateChat()"
       >
+      // angular material design
         <mat-icon>add</mat-icon>
       </button>
     </div>
 
+    // if-angular block
     @if (showCreateChat) {
+      // custom directive
       <div *appHasRole="['update', 'admin']" class="create-chat-box">
 
         <input
@@ -28,7 +31,7 @@
           placeholder="Chatname"
           [(ngModel)]="chatName"
         >
-
+// form aber KEIN reactive form !
         <select [(ngModel)]="chatType">
           <option value="GROUP">Gruppenchat</option>
           <option value="DIRECT">Direktchat</option>
@@ -41,15 +44,18 @@
         >
 
         @if (errorMessage) {
+          // data binding
           <p class="error-message">{{ errorMessage }}</p>
         }
 
+        // event binding (click)
         <button
           class="save-chat-button"
           type="button"
           (click)="createChat()"
           [disabled]="loading"
         >
+        // property binding (disabled = loading)
           {{ loading ? 'Wird geladen...' : 'Chat erstellen' }}
         </button>
 
@@ -76,6 +82,7 @@
 
   </div>
 
+  // Komponentenselektor 
   <app-user-profile></app-user-profile>
 
 </aside>

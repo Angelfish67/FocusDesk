@@ -16,6 +16,8 @@ import {
   UserResponse
 } from '../../../service/chat-api.service';
 
+// selektor
+
 @Component({
   selector: 'app-chat-sidebar',
   standalone: true,
@@ -59,6 +61,7 @@ export class ChatSidebarComponent implements OnInit, OnDestroy {
     this.loadChats();
 
     this.subscriptions.add(
+      // wartet auf antwort, subscribe (observable)
       this.chatApiService.selectedChat$.subscribe(chat => {
         this.selectedChat = chat;
       })
