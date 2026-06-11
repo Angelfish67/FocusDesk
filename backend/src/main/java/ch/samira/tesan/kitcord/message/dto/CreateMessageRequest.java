@@ -16,17 +16,12 @@ public class CreateMessageRequest {
     @NotNull
     private Long chatId;
 
-    @Schema(example = "1")
-    @NotNull
-    private Long senderId;
-
     public CreateMessageRequest() {
     }
 
-    public CreateMessageRequest(String content, Long chatId, Long senderId) {
+    public CreateMessageRequest(String content, Long chatId) {
         this.content = content;
         this.chatId = chatId;
-        this.senderId = senderId;
     }
 
     public String getContent() {
@@ -37,19 +32,11 @@ public class CreateMessageRequest {
         return chatId;
     }
 
-    public Long getSenderId() {
-        return senderId;
-    }
-
     public void setContent(String content) {
         this.content = content;
     }
 
     public void setChatId(Long chatId) {
         this.chatId = chatId;
-    }
-
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
     }
 }
