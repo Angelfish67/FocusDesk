@@ -99,12 +99,4 @@ export class ChatApiService {
       `${this.apiUrl}/chats/${chatId}/users/${userId}`
     );
   }
-
-  getMessagesByChat(chatId: number): Observable<MessageResponse[]> {
-    return this.http.get<MessageResponse[]>(`${this.apiUrl}/messages/chat/${chatId}`);
-  }
-
-  sendMessage(request: CreateMessageRequest): Observable<MessageResponse> {
-    return this.http.post<MessageResponse>(`${this.apiUrl}/messages`, request);
-  }
 }
