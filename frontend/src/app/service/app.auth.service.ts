@@ -64,7 +64,9 @@ export class AppAuthService {
 
     await this.oauthService.loadDiscoveryDocumentAndTryLogin();
 
-    this.oauthService.setupAutomaticSilentRefresh();
+    if (this.hasValidAccessToken()) {
+      this.oauthService.setupAutomaticSilentRefresh();
+    }
 
     this.initialized = true;
     this.handleEvents(null);
@@ -135,28 +137,39 @@ export class AppAuthService {
     this.oauthService.initCodeFlow();
   }
 
- public async register(): Promise<void> {
-  await this.initAuth();
+  public async register(): Promise<void> {
+    await this.initAuth();
 
-  if (this.hasValidAccessToken()) {
-    await this.router.navigateByUrl('/chat');
-    return;
+    if (this.hasValidAccessToken()) {
+      await this.router.navigateByUrl('/chat');
+      return;
+    }
+
+    this.oauthService.initCodeFlow(undefined, {
+      action: 'register'
+    });
   }
 
-  this.oauthService.initCodeFlow(undefined, {
-    action: 'register'
-  });
-}
-
   public logout(): void {
-    this.oauthService.logOut();
+    this.oauthService.stopAutomaticRefresh();
 
+    this.clearLocalAuthState();
+
+    this.oauthService.logOut({
+      client_id: this.authConfig.clientId,
+      post_logout_redirect_uri: this.authConfig.postLogoutRedirectUri
+    });
+  }
+
+  private clearLocalAuthState(): void {
     sessionStorage.removeItem('access_token');
     sessionStorage.removeItem('id_token');
     sessionStorage.removeItem('refresh_token');
     sessionStorage.removeItem('nonce');
     sessionStorage.removeItem('PKCE_verifier');
     sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('idToken');
+    sessionStorage.removeItem('refreshToken');
 
     this.useraliasSubject.next('');
     this.usernameSubject.next('');
@@ -179,6 +192,8 @@ export class AppAuthService {
 
     if (!this._accessToken) {
       this._decodedAccessToken = null;
+      this.usernameSubject.next('');
+      this.useraliasSubject.next('');
       return;
     }
 
@@ -207,10 +222,6 @@ export class AppAuthService {
     this.usernameSubject.next(displayName);
     this.useraliasSubject.next(preferredUsername);
   }
-
-private isOAuthCallbackUrl(): boolean {
-  return window.location.pathname === '/auth/callback';
-}
 
   private normalizeRole(role: string): string {
     return role
