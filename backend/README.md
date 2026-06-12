@@ -1,38 +1,49 @@
-# Kitcord Frontend
+# Kitcord – Projektkonfiguration
 
-## Projektkonfiguration
+## 1. Allgemeine Informationen
 
----
+### Projektname
+Kitcord
 
-# 1. Allgemeine Informationen
+### Technologie
+- Spring Boot 4
+- Java 26
+- Maven
+- PostgreSQL
+- Keycloak
+- Swagger / OpenAPI
 
-## Projektname
+### Authentifizierung
+OAuth2 Resource Server mit JWT über Keycloak
 
-Kitcord Frontend
-
-## Technologie
-
-* Angular
-* TypeScript
-* Angular Material
-* OAuth2 / OpenID Connect
-* Keycloak
-* npm
-
-## Authentifizierung
-
-Login über Keycloak mit JWT Access Token.
-
-## Frontend URL
-
-```text
-http://localhost:4200
-```
-
-## Backend API URL
+### API Base URL
 
 ```text
 http://localhost:9090
+```
+
+## application.yml
+
+```yaml
+server:
+  port: 9090
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/kitcord
+
+app:
+  name: kitcord
+
+keycloak:
+  server-url: http://localhost:8080
+  realm: kitcord
+  client-id: kitcord
+  admin-client-id: kitcord_backend
+  admin-client-secret: chsuCzGIr50BGxqsBDVyRmUzXATsvaST
 ```
 
 ---
@@ -41,96 +52,166 @@ http://localhost:9090
 
 Folgende Software muss installiert sein:
 
-* Node.js
-* npm
-* Angular CLI
-* Git
-* laufendes Backend
-* laufender Keycloak Server
+- Java 26
+- Maven
+- PostgreSQL
+- Keycloak 26.x
+- Git
 
 ---
 
 # 3. Projektstruktur
 
-Das Frontend verwendet folgende Architektur:
+Das Projekt verwendet folgende Architektur:
 
 ```text
-Component
+Controller
 ↓
 Service
 ↓
-HTTP Client
+Repository
 ↓
-Spring Boot Backend
+PostgreSQL Datenbank
 ```
 
-Verwendete Hauptbereiche:
+Verwendete Hauptmodule:
 
-* Login
-* Registrierung
-* Chat Ansicht
-* Nachrichten
-* Admin Konsole
-* Routing
-* Guards
-* Rollenbasierte Anzeige
+- User Management
+- Chat Management
+- Message Management
+- Authentication / Authorization
+- Swagger API Dokumentation
 
 ---
 
-# 4. Ports
+# 4. Datenbankkonfiguration
 
-| Service          | Port |
-| ---------------- | ---- |
-| Angular Frontend | 4200 |
-| Spring Boot API  | 9090 |
-| Keycloak         | 8080 |
-| PostgreSQL       | 5432 |
+## PostgreSQL
+
+### Verbindung
+
+| Einstellung | Wert |
+|---|---|
+| Host | localhost |
+| Port | 5432 |
+| Datenbank | kitcord |
+| Benutzer | postgres |
+| Passwort | 123456 |
 
 ---
 
-# 5. Backend Voraussetzung
+## Datenbank erstellen
 
-Das Backend muss vor dem Frontend gestartet sein.
+Die Datenbank muss vor dem Start existieren.
 
-## Backend URL
+SQL:
 
-```text
-http://localhost:9090
-```
-
-## Backend Start mit PostgreSQL
-
-```bash
-mvn spring-boot:run "-Dspring-boot.run.profiles=postgres"
-```
-
-## Backend Start mit H2
-
-```bash
-mvn spring-boot:run "-Dspring-boot.run.profiles=h2"
+```sql
+CREATE DATABASE kitcord;
 ```
 
 ---
 
-# 6. Keycloak Voraussetzung
+# 4. Datenbankkonfiguration
 
-Keycloak muss laufen:
+## PostgreSQL
 
-```text
-http://localhost:8080
+### Verbindung
+
+| Einstellung | Wert |
+|---|---|
+| Host | localhost |
+| Port | 5432 |
+| Datenbank | kitcord |
+| Benutzer | postgres |
+| Passwort | 123456 |
+
+---
+
+## Datenbank erstellen
+
+Die Datenbank muss vor dem Start existieren.
+
+SQL:
+
+```sql
+CREATE DATABASE kitcord;
 ```
+
+---
+
+## application-postgres.yml
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/kitcord
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+```
+
+---
+
+## application-h2.yml
+
+```yaml
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  datasource:
+    url: jdbc:h2:mem:kitcord
+    username: sa
+    password:
+    driverClassName: org.h2.Driver
+
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+```
+
+---
+
+---
+
+# 5. Keycloak Konfiguration
 
 ## Keycloak starten
+
+Im Keycloak Ordner:
 
 ```bash
 cd C:\Pfad\keycloak-26.6.0\bin
 ```
 
+Danach:
+
 ```bash
 .\kc.bat start-dev --http-port=8080 --bootstrap-admin-username=admin --bootstrap-admin-password=admin
 ```
 
-## Admin Console
+---
+
+## Keycloak Login
+
+| Einstellung | Wert |
+|---|---|
+| URL | http://localhost:8080 |
+| Username | admin |
+| Passwort | admin |
+
+Admin Console:
 
 ```text
 http://localhost:8080/admin
@@ -138,7 +219,24 @@ http://localhost:8080/admin
 
 ---
 
-# 7. Keycloak Konfiguration
+# 6. Realm importieren
+
+Im Projekt befindet sich:
+
+```text
+kitcord-realm.json
+```
+
+Diesen Realm in Keycloak importieren:
+
+1. Keycloak öffnen
+2. Create Realm auswählen
+3. Import wählen
+4. kitcord-realm.json importieren
+
+---
+
+# 7. Realm Informationen
 
 ## Realm
 
@@ -146,53 +244,63 @@ http://localhost:8080/admin
 kitcord
 ```
 
-## Frontend Client
+---
 
-| Einstellung          | Wert           |
-| -------------------- | -------------- |
-| Client ID            | kitcord        |
-| Client Type          | OpenID Connect |
-| Access Type          | Public         |
-| Standard Flow        | aktiviert      |
-| Direct Access Grants | aktiviert      |
+## Clients
 
-## Redirect URI
+### Frontend Client
 
-Der Angular Login leitet nach Keycloak wieder zurück auf das Frontend.
+Der Frontend Client wird für Benutzerlogin und JWT Token verwendet.
 
-Empfohlene Redirect URI:
-
-```text
-http://localhost:4200/*
-```
-
-Oder genauer:
-
-```text
-http://localhost:4200/auth/callback
-```
-
-## Rollen
-
-Folgende Rollen werden im Frontend verwendet:
-
-```text
-ROLE_admin
-ROLE_read
-ROLE_update
-```
-
-### Rollenbasierte Zugriffe
-
-| Rolle       | Zugriff                          |
-| ----------- | -------------------------------- |
-| ROLE_admin  | Admin Konsole und Vollzugriff    |
-| ROLE_read   | Chat lesen                       |
-| ROLE_update | Chats und Nachrichten bearbeiten |
+| Einstellung | Wert |
+|---|---|
+| Client ID | kitcord |
+| Client Type | OpenID Connect |
+| Access Type | Public |
+| Direct Access Grants | aktiviert |
+| Service Accounts | deaktiviert |
 
 ---
 
-# 8. Projekt starten
+### Backend Client
+
+Der Backend Client wird für administrative Backend-Aufgaben verwendet.
+
+| Einstellung | Wert |
+|---|---|
+| Client ID | kitcord_backend |
+| Client Type | OpenID Connect |
+| Access Type | Confidential |
+| Direct Access Grants | aktiviert |
+| Service Accounts | aktiviert |
+
+---
+
+## Rollen
+
+Folgende Rollen werden verwendet:
+
+- ROLE_admin
+- ROLE_read
+- ROLE_update
+
+Die Rollen existieren als:
+- Realm Roles
+- Client Roles im Client `kitcord`
+
+---
+
+# 8. Ports
+
+| Service | Port |
+|---|---|
+| Spring Boot API | 9090 |
+| Keycloak | 8080 |
+| PostgreSQL | 5432 |
+
+---
+
+# 9. Projekt starten
 
 ## Repository klonen
 
@@ -200,221 +308,216 @@ ROLE_update
 git clone <REPOSITORY_URL>
 ```
 
-## In Frontend Ordner wechseln 
+---
+
+## In Projekt wechseln
 
 ```bash
-cd Kitcord/frontend
+cd Kitcord
 ```
 
-## npm Dependencies installieren
+---
+
+## Maven Dependencies installieren
 
 ```bash
-npm install
+mvn clean install
 ```
 
-## Frontend starten
+---
+
+## Backend mit PostgreSQL starten
 
 ```bash
-npm start
+mvn spring-boot:run "-Dspring-boot.run.profiles=postgres"
 ```
 
-Falls `npm start` nicht funktioniert:
+---
+
+## Backend mit H2 starten
 
 ```bash
-ng serve
+mvn spring-boot:run "-Dspring-boot.run.profiles=h2"
 ```
 
-Danach ist das Frontend erreichbar unter:
+H2 Console:
 
 ```text
-http://localhost:4200
+http://localhost:9090/h2-console
 ```
 
 ---
 
-# 9. Proxy Konfiguration
+# 10. Swagger UI
 
-Das Frontend kommuniziert über den Angular Proxy mit dem Backend.
-
-Backend Requests werden an diese URL weitergeleitet:
+Swagger UI:
 
 ```text
-http://localhost:9090
+http://localhost:9090/swagger-ui.html
 ```
 
-Dadurch muss im Frontend nicht jedes Mal die komplette Backend URL verwendet werden.
-
----
-
-# 10. Login Ablauf
-
-1. Benutzer öffnet das Frontend:
+OpenAPI JSON:
 
 ```text
-http://localhost:4200
+http://localhost:9090/v3/api-docs
 ```
 
-2. Benutzer klickt auf Login.
-3. Benutzer wird zu Keycloak weitergeleitet.
-4. Nach erfolgreichem Login kommt der Benutzer zurück zum Frontend.
-5. Danach wird der Benutzer zum Chat weitergeleitet:
+---
+
+# 11. JWT Token holen
+
+## Endpoint
+
+POST
 
 ```text
-http://localhost:4200/chat
+http://localhost:8080/realms/kitcord/protocol/openid-connect/token
 ```
 
 ---
 
-# 11. Registrierung
+## Headers
 
-Die Registrierung läuft ebenfalls über Keycloak.
-
-Nach der Registrierung wird der Benutzer wieder zum Frontend weitergeleitet.
-
----
-
-# 12. Routen
-
-| Route     | Beschreibung  |
-| --------- | ------------- |
-| /         | Startseite    |
-| /homepage | Homepage      |
-| /login    | Login Seite   |
-| /register | Registrierung |
-| /chat     | Chat Bereich  |
-| /admin    | Admin Konsole |
-| /noaccess | Kein Zugriff  |
+```text
+Content-Type: application/x-www-form-urlencoded
+```
 
 ---
 
-# 13. Rollenbasierte Zugriffe
+## Body
 
-Das Frontend schützt Seiten über Guards.
-
-Zusätzlich werden Buttons und Bereiche über Rollen ein- oder ausgeblendet.
-
-Beispiele:
-
-* Chat öffnen nur mit Leserechten
-* Nachrichten schreiben nur mit Update-Rechten
-* Admin Konsole nur mit Admin-Rechten
+```text
+grant_type=password
+client_id=kitcord
+username=admin
+password=0210
+```
 
 ---
 
-# 14. Tests
+## Beispiel Response
 
-Das Projekt enthält Frontend Tests.
+```json
+{
+  "access_token": "eyJhbGciOi...",
+  "expires_in": 300,
+  "refresh_expires_in": 1800,
+  "token_type": "Bearer"
+}
+```
+
+---
+
+# 12. Bearer Token verwenden
+
+Beispiel:
+
+```text
+Authorization: Bearer <ACCESS_TOKEN>
+```
+
+---
+
+# 13. Beispiel API Requests
+
+## Benutzer abrufen
+
+```http
+GET http://localhost:9090/admin/users
+Authorization: Bearer <ACCESS_TOKEN>
+```
+
+---
+
+## Chat erstellen
+
+```http
+POST http://localhost:9090/chats
+Authorization: Bearer <ACCESS_TOKEN>
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "name": "General",
+  "chatType": "GROUP"
+}
+```
+
+---
+
+# 14. Security
+
+Die API verwendet:
+
+- OAuth2 Resource Server
+- JWT Bearer Authentication
+- Rollenbasierte Autorisierung
+
+Alle Endpoints sind abgesichert.
+
+---
+
+## Rollenbasierte Zugriffe
+
+| Rolle | Zugriff |
+|---|---|
+| ROLE_admin | Vollzugriff |
+| ROLE_read | Lesen |
+| ROLE_update | Bearbeiten |
+
+---
+
+# 15. Testing
+
+Das Projekt enthält:
+
+- JUnit Tests
+- Repository Tests
+- Controller Tests
+- Swagger API Dokumentation
+
+---
 
 ## Tests ausführen
 
 ```bash
-npm test
+mvn test
 ```
 
 ---
 
-# 15. Build
+# 16. Verwendete Technologien
 
-Frontend für Produktion bauen:
-
-```bash
-npm run build
-```
-
-Der fertige Build befindet sich danach im `dist` Ordner.
-
----
-
-# 16. Häufige Fehler
-
-## Fehler: ng wird nicht erkannt
-
-Angular CLI installieren:
-
-```bash
-npm install -g @angular/cli
-```
-
-Oder das Projekt direkt mit npm starten:
-
-```bash
-npm start
-```
-
-## Fehler: Frontend startet nicht
-
-Dependencies neu installieren:
-
-```bash
-npm install
-```
-
-Danach erneut starten:
-
-```bash
-npm start
-```
-
-## Fehler: Backend nicht erreichbar
-
-Prüfen, ob das Backend läuft:
-
-```text
-http://localhost:9090
-```
-
-## Fehler: Keycloak Login funktioniert nicht
-
-Prüfen, ob Keycloak läuft:
-
-```text
-http://localhost:8080
-```
-
-Außerdem prüfen:
-
-* Realm `kitcord` existiert
-* Client `kitcord` existiert
-* Redirect URI ist korrekt
-* Benutzer hat die benötigten Rollen
-
-## Fehler: Nach Login kommt `/noaccess`
-
-Dann fehlen dem Benutzer wahrscheinlich Rollen.
-
-Mindestens erforderlich:
-
-```text
-ROLE_read
-```
-
-Für Bearbeiten:
-
-```text
-ROLE_update
-```
-
-Für Admin:
-
-```text
-ROLE_admin
-```
+| Technologie | Zweck |
+|---|---|
+| Spring Boot | Backend Framework |
+| Spring Security | Security |
+| Keycloak | Authentication |
+| PostgreSQL | Datenbank |
+| Hibernate / JPA | ORM |
+| Swagger / OpenAPI | API Dokumentation |
+| Maven | Build Tool |
+| JUnit | Testing |
 
 ---
 
 # 17. Wichtige Hinweise
 
-* Das Frontend läuft auf Port 4200.
-* Das Backend muss vor dem Login erreichbar sein.
-* Keycloak muss vor dem Login erreichbar sein.
-* Ohne gültigen Access Token sind geschützte Seiten nicht erreichbar.
-* Die Rollen müssen exakt gleich heißen wie in Keycloak und im Backend.
-* Der Client `kitcord` wird für den Frontend Login verwendet.
-* Nach erfolgreichem Login wird der Benutzer zum Chat weitergeleitet.
-* API Requests werden mit Bearer Token an das Backend gesendet.
+- Ohne gültigen JWT Token sind alle Endpoints gesperrt ausser Login und Create von einem User.
+- PostgreSQL muss laufen bevor das Backend gestartet wird.
+- Keycloak muss laufen bevor Login Requests funktionieren.
+- Die Datenbanktabellen werden automatisch erstellt.
+- Swagger unterstützt Bearer Authentication.
+- Der Client `kitcord` wird für Benutzerlogin verwendet.
+- Der Client `kitcord_backend` wird für Backend-Services und Keycloak-Administration verwendet.
+- Die Rollen müssen exakt gleich heißen wie im Backend.
+- Der Wert von `app.name` muss exakt dem Keycloak Client entsprechen.
 
 ---
 
 # 18. Entwickler
 
-Projekt im Rahmen von Modul 294 erstellt.
+Projekt im Rahmen von Modul 295 erstellt.
