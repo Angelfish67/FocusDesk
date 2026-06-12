@@ -124,14 +124,6 @@ public User syncCurrentUser(Jwt jwt) {
         }
     }
 
-    @Transactional
-    public void deleteUser(Long id) {
-        User user = getUserById(id);
-
-        keycloakAdminService.deleteUser(user.getKeycloakId());
-        userRepository.delete(user);
-    }
-
     public void changePassword(@Valid PasswordChangeRequest passwordChangeRequest) {
         User user = getUserById(passwordChangeRequest.getId());
 
@@ -142,4 +134,15 @@ public User syncCurrentUser(Jwt jwt) {
                 passwordChangeRequest.getNewPassword()
         );
     }
+
+    @Transactional
+public void deleteUser(Long id) {
+    User user = getUserById(id);
+
+    if (user.getKeycloakId() != null && !user.getKeycloakId().isBlank()) {
+        keycloakAdminService.deleteUser(user.getKeycloakId());
+    }
+
+    userRepository.delete(user);
+}
 }

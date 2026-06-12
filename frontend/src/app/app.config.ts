@@ -28,7 +28,7 @@ import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { authTokenInterceptor } from './interceptor/auth-token.interceptor';
 import { AppAuthService } from './service/app.auth.service';
-import { MatPaginatorI18nService } from './service/mat.intl.service';
+
 
 if (environment.production) {
   enableProdMode();
@@ -74,10 +74,6 @@ export const appConfig: ApplicationConfig = {
 
     provideRouter(routes),
 
-    {
-      provide: MatPaginatorIntl,
-      useClass: MatPaginatorI18nService
-    },
     {
       provide: AuthConfig,
       useValue: authConfig
