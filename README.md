@@ -1,1 +1,1 @@
-Für das Frontend und Backend existiert ein eigenes Read me in den entsprechenden Ordner.
+Für das Frontend und Backend existiert ein eigenes ReadMe in den entsprechenden Ordner.
