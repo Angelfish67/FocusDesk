@@ -39,14 +39,25 @@ http://localhost:9090
 
 # 2. Voraussetzungen
 
+# 2. Voraussetzungen
+
 Folgende Software muss installiert sein:
 
-* Node.js
-* npm
-* Angular CLI
-* Git
-* laufendes Backend
-* laufender Keycloak Server
+- Node.js
+- npm
+- Angular CLI
+- Git
+- laufendes Backend
+- laufender Keycloak Server
+
+## Entwickler Packages
+
+Für Entwicklung, Tests und Codequalität werden verwendet:
+
+- ESLint
+- Angular ESLint
+- TypeScript ESLint
+- Vitest
 
 ---
 
@@ -114,6 +125,7 @@ mvn spring-boot:run "-Dspring-boot.run.profiles=h2"
 
 # 6. Keycloak Voraussetzung
 
+Da Änderungen am Keycloak vorgenommen wurden, muss das Realm neu importiert werden. Die Datei liegt im Backendordner im Keycloakordner als json-Datei.
 Keycloak muss laufen:
 
 ```text

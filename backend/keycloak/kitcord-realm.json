@@ -1,6 +1,8 @@
 {
   "id": "dba3fda4-711c-4719-b65b-8292834c7324",
   "realm": "kitcord",
+  "displayName": "",
+  "displayNameHtml": "",
   "notBefore": 0,
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
@@ -27,13 +29,13 @@
   "oauth2DevicePollingInterval": 5,
   "enabled": true,
   "sslRequired": "external",
-  "registrationAllowed": false,
+  "registrationAllowed": true,
   "registrationEmailAsUsername": false,
-  "rememberMe": false,
+  "rememberMe": true,
   "verifyEmail": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
-  "resetPasswordAllowed": false,
+  "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": false,
   "permanentLockout": false,
@@ -95,6 +97,10 @@
             "uma_authorization"
           ],
           "client": {
+            "kitcord": [
+              "ROLE_update",
+              "ROLE_read"
+            ],
             "account": [
               "manage-account",
               "view-profile"
@@ -790,18 +796,19 @@
       "clientId": "kitcord",
       "name": "",
       "description": "",
-      "rootUrl": "",
+      "rootUrl": "http://localhost:4200",
       "adminUrl": "",
-      "baseUrl": "",
+      "baseUrl": "http://localhost:4200",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        ""
+        "http://localhost:4200/auth/callback",
+        "http://localhost:4200/auth/callback/*"
       ],
       "webOrigins": [
-        ""
+        "http://localhost:4200"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -814,17 +821,18 @@
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
-        "realm_client": "false",
         "logout.confirmation.enabled": "false",
-        "oidc.ciba.grant.enabled": "false",
         "client.secret.creation.time": "1778162141",
-        "backchannel.logout.session.required": "true",
         "standard.token.exchange.enabled": "false",
         "oauth2.jwt.authorization.grant.enabled": "false",
         "frontchannel.logout.session.required": "true",
+        "post.logout.redirect.uris": "http://localhost:4200/*",
         "oauth2.device.authorization.grant.enabled": "false",
-        "display.on.consent.screen": "false",
         "backchannel.logout.revoke.offline.tokens": "false",
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "display.on.consent.screen": "false",
         "dpop.bound.access.tokens": "false"
       },
       "authenticationFlowBindingOverrides": {},
@@ -2765,9 +2773,12 @@
     "realmReusableOtpCode": "false",
     "cibaExpiresIn": "120",
     "oauth2DeviceCodeLifespan": "600",
+    "saml.signature.algorithm": "",
     "parRequestUriLifespan": "60",
     "clientSessionMaxLifespan": "0",
-    "scimApiEnabled": "false"
+    "frontendUrl": "http://localhost:8080",
+    "scimApiEnabled": "false",
+    "acr.loa.map": "{}"
   },
   "keycloakVersion": "26.6.0",
   "userManagedAccessAllowed": false,
