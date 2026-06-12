@@ -181,14 +181,15 @@ ROLE_admin
 ROLE_read
 ROLE_update
 ```
+Im Code wird ROLE_ entfernt.
 
 ### Rollenbasierte Zugriffe
 
 | Rolle       | Zugriff                          |
 | ----------- | -------------------------------- |
-| ROLE_admin  | Admin Konsole und Vollzugriff    |
-| ROLE_read   | Chat lesen                       |
-| ROLE_update | Chats und Nachrichten bearbeiten |
+| admin  | Admin Konsole und Vollzugriff    |
+| read   | Chat lesen                       |
+| update | Chats und Nachrichten bearbeiten |
 
 ---
 
@@ -197,10 +198,10 @@ ROLE_update
 ## Repository klonen
 
 ```bash
-git clone <REPOSITORY_URL>
+git clone https://github.com/Angelfish67/Kitcord
 ```
 
-## In Frontend Ordner wechseln 
+## In Frontend Ordner wechseln
 
 ```bash
 cd Kitcord/frontend
@@ -253,11 +254,14 @@ Dadurch muss im Frontend nicht jedes Mal die komplette Backend URL verwendet wer
 ```text
 http://localhost:4200
 ```
-
-2. Benutzer klickt auf Login.
+![alt text](image.png)
+2. Benutzer klickt auf Login:
+http://localhost:4200/login
+![alt text](image-1.png)
 3. Benutzer wird zu Keycloak weitergeleitet.
 4. Nach erfolgreichem Login kommt der Benutzer zurück zum Frontend.
 5. Danach wird der Benutzer zum Chat weitergeleitet:
+![alt text](image-2.png)
 
 ```text
 http://localhost:4200/chat
@@ -278,9 +282,7 @@ Nach der Registrierung wird der Benutzer wieder zum Frontend weitergeleitet.
 | Route     | Beschreibung  |
 | --------- | ------------- |
 | /         | Startseite    |
-| /homepage | Homepage      |
-| /login    | Login Seite   |
-| /register | Registrierung |
+| /login    | Login/Regristrierungs Seite   |
 | /chat     | Chat Bereich  |
 | /admin    | Admin Konsole |
 | /noaccess | Kein Zugriff  |
@@ -298,6 +300,7 @@ Beispiele:
 * Chat öffnen nur mit Leserechten
 * Nachrichten schreiben nur mit Update-Rechten
 * Admin Konsole nur mit Admin-Rechten
+* Admin Knöpfe wie der Knopf zu /admin oder das Löschen von Chats sehen nur Admins
 
 ---
 
@@ -310,91 +313,143 @@ Das Projekt enthält Frontend Tests.
 ```bash
 npm test
 ```
+![alt text](image-3.png)
 
 ---
 
-# 15. Build
+# 15. Wichtige Hinweise
 
-Frontend für Produktion bauen:
-
-```bash
-npm run build
-```
-
-Der fertige Build befindet sich danach im `dist` Ordner.
+* Das Frontend läuft auf Port 4200.
+* Das Backend muss vor dem Login erreichbar sein.
+* Keycloak muss vor dem Login erreichbar sein.
+* Ohne gültigen Access Token sind geschützte Seiten nicht erreichbar.
+* Der Client `kitcord` wird für den Frontend Login verwendet.
+* Nach erfolgreichem Login wird der Benutzer zum Chat weitergeleitet.
+* API Requests werden mit Bearer Token an das Backend gesendet.
 
 ---
 
-# 16. Häufige Fehler
+# 16. Benutzung der App
 
-## Fehler: ng wird nicht erkannt
+Dieser Guide erklärt wie man in der App die Funktionen benutzt. Für Adminfunktionen muss man sich bei Keycloak anmelden und dem User im Client Kitcord und Kitcord Backend die Rolle ROLE_admin zuweisen !
+Passwort und Username von Keycloak sind "admin".
 
-Angular CLI installieren:
+![alt text](image-5.png)
 
-```bash
-npm install -g @angular/cli
-```
+# Benutzeroberfläche
 
-Oder das Projekt direkt mit npm starten:
+## Übersicht
 
-```bash
-npm start
-```
+Die Anwendung besteht aus mehreren Bereichen, welche unterschiedliche Funktionen innerhalb von Kitcord bereitstellen.
 
-## Fehler: Frontend startet nicht
+---
 
-Dependencies neu installieren:
+# Chat erstellen (dunkelblau)
 
-```bash
-npm install
-```
+Dieser Bereich dient zum Erstellen neuer Chats.
 
-Danach erneut starten:
+## Funktionen
 
-```bash
-npm start
-```
+- Chatname eingeben
+- Chattyp auswählen (Gruppenchat oder Direktchat)
+- Benutzer per User-ID hinzufügen
+- Eigene User-ID wird angezeigt
+- Chat erstellen
 
-## Fehler: Backend nicht erreichbar
+## Zweck
 
-Prüfen, ob das Backend läuft:
+Erstellt einen neuen Chat und fügt die angegebenen Benutzer automatisch hinzu.
 
-```text
-http://localhost:9090
-```
+---
 
-## Fehler: Keycloak Login funktioniert nicht
+# Chat verwalten (grün)
 
-Prüfen, ob Keycloak läuft:
+Dieser Bereich dient zur Bearbeitung des aktuell ausgewählten Chats.
 
-```text
-http://localhost:8080
-```
+## Funktionen
 
-Außerdem prüfen:
+- Chatnamen ändern
+- Chat speichern
+- Benutzer hinzufügen
+- Benutzer entfernen
+- Chat löschen
 
-* Realm `kitcord` existiert
-* Client `kitcord` existiert
-* Redirect URI ist korrekt
-* Benutzer hat die benötigten Rollen
+## Zweck
 
-## Fehler: Nach Login kommt `/noaccess`
+Verwaltung bestehender Chats.
 
-Dann fehlen dem Benutzer wahrscheinlich Rollen.
+---
 
-Mindestens erforderlich:
+# Chatliste (rot)
 
-```text
-ROLE_read
-```
+Die Chatliste zeigt alle Chats an, in denen der Benutzer Mitglied ist.
 
-Für Bearbeiten:
+## Funktionen
 
-```text
-ROLE_update
-```
+- Chat auswählen
+- Zwischen Chats wechseln
+- Aktiven Chat anzeigen
+- Als Admin kann man Chats per blau markierten Knopf im roten Bereich löschen
 
-Für Admin:
+## Zweck
+
+Navigation zwischen verschiedenen Chats und Löschen von Chats.
+
+---
+
+# Benutzerbereich (gelb)
+
+Der Benutzerbereich befindet sich unten links.
+
+## Enthält
+
+- Avatar
+- Benutzername
+- Online-Status
+- Profilbutton
+
+## Zweck
+
+Anzeige der aktuell angemeldeten Person und Zugriff auf Profilinformationen.
+
+---
+
+# Logout (orange)
+
+Der Logout-Button befindet sich neben dem Benutzerbereich.
+
+## Funktion
+
+Meldet den Benutzer von Kitcord und Keycloak ab.
+
+---
+
+# Nachrichteneingabe (hellblau)
+
+Die Nachrichteneingabe befindet sich am unteren Rand des Chatfensters.
+
+## Funktionen
+
+- Nachricht schreiben
+- Nachricht absenden
+
+## Zweck
+
+Versenden von Nachrichten im aktuell geöffneten Chat.
+
+---
+
+# Admin Bereich (rosa)
+
+Der Admin Button befindet sich oben rechts.
+
+## Funktion
+
+Öffnet die Admin-Konsole.
+
+## Berechtigung
+
+Nur Benutzer mit folgender Keycloakrolle können diesen Bereich sehen:
 
 ```text
 ROLE_admin
@@ -402,19 +457,39 @@ ROLE_admin
 
 ---
 
-# 17. Wichtige Hinweise
+# Nachrichten Bearbeiten und Löschen
 
-* Das Frontend läuft auf Port 4200.
-* Das Backend muss vor dem Login erreichbar sein.
-* Keycloak muss vor dem Login erreichbar sein.
-* Ohne gültigen Access Token sind geschützte Seiten nicht erreichbar.
-* Die Rollen müssen exakt gleich heißen wie in Keycloak und im Backend.
-* Der Client `kitcord` wird für den Frontend Login verwendet.
-* Nach erfolgreichem Login wird der Benutzer zum Chat weitergeleitet.
-* API Requests werden mit Bearer Token an das Backend gesendet.
+Nach dem Versenden einer Nachricht kann man via Hover die Optionen Bearbeiten und Löschen der Nachricht sehen:
+
+![alt text](image-6.png)
 
 ---
+# Bearbeitung und Löschung des Accounts
+Hier kann man den Account bearbeiten und löschen:
 
-# 18. Entwickler
+http://localhost:4200/profile
+
+![alt text](image-7.png)
+
+Die Knöpfe sind selbsterklärend:
+- In der Gefahrenzone kann man den Account löschen
+- "Mit Keycloak synchronisieren" wird nur für das Login verwendet, jedoch kann man es hier testen ob es funktioniert
+- Passwort ändern funktioniert analog wie in den meisten Applikationen
+- "Zurück zum Chat" führt zu /chat
+
+---
+# Admin Konsole
+
+Auf diese Seite kommt man nur mit der ROLE_admin Zuweisung im Keycloak:
+
+http://localhost:4200/admin
+
+![alt text](image-8.png)
+Hier kann man:
+- Alle User, Chats und Nachrichten sehen
+- User erstellen (wenn man die Keycloak ID hat)
+- User Bearbeiten und Löschen
+
+# 17. Entwickler
 
 Projekt im Rahmen von Modul 294 erstellt.
